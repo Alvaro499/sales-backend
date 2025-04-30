@@ -5,7 +5,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "pymes")
-public class Pyme {
+public class PymeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,7 +16,7 @@ public class Pyme {
     private String email;
 
     @OneToMany(mappedBy = "pyme", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Product> products;
+    private List<ProductEntity> products;
 
     // Getters and Setters
     public Long getId() { return id; }
@@ -28,6 +28,6 @@ public class Pyme {
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
 
-    public List<Product> getProducts() { return products; }
-    public void setProducts(List<Product> products) { this.products = products; }
+    public List<ProductEntity> getProducts() { return products; }
+    public void setProducts(List<ProductEntity> products) { this.products = products; }
 }

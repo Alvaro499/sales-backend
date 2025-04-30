@@ -6,7 +6,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "products")
-public class Product {
+public class ProductEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,7 +36,7 @@ public class Product {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pyme_id", nullable = false)
-    private Pyme pyme;
+    private PymeEntity pyme;
 
     // Getters and Setters
     public Long getId() { return id; }
@@ -69,6 +69,6 @@ public class Product {
     public Integer getStock() { return stock; }
     public void setStock(Integer stock) { this.stock = stock; }
 
-    public Pyme getPyme() { return pyme; }
-    public void setPyme(Pyme pyme) { this.pyme = pyme; }
+    public PymeEntity getPyme() { return pyme; }
+    public void setPyme(PymeEntity pyme) { this.pyme = pyme; }
 }
