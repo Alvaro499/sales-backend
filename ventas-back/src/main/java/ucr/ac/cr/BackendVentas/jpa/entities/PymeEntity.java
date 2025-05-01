@@ -2,6 +2,7 @@ package ucr.ac.cr.BackendVentas.jpa.entities;
 
 import jakarta.persistence.*;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "pymes")
@@ -9,7 +10,7 @@ public class PymeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private UUID id;
 
     private String businessName;
 
@@ -19,8 +20,8 @@ public class PymeEntity {
     private List<ProductEntity> products;
 
     // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
 
     public String getBusinessName() { return businessName; }
     public void setBusinessName(String businessName) { this.businessName = businessName; }
