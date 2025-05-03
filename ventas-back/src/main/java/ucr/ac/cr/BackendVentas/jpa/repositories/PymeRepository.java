@@ -5,4 +5,5 @@ import ucr.ac.cr.BackendVentas.jpa.entities.PymeEntity;
 
 public interface PymeRepository extends JpaRepository <PymeEntity, String> {
 
+    boolean existsByEmail(String email);
 }
