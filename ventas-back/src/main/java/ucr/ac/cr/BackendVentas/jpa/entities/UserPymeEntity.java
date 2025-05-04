@@ -10,7 +10,7 @@ public class UserPymeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_pymes")
+    @Column(name = "user_pyme_id")
     private Integer id;
 
     @ManyToOne
