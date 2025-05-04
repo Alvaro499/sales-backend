@@ -1,6 +1,7 @@
 package ucr.ac.cr.BackendVentas.jpa.entities;
 
 import jakarta.persistence.*;
+import java.util.ArrayList; 
 import java.util.List;
 import java.util.UUID;
 
@@ -8,29 +9,49 @@ import java.util.UUID;
 @Table(name = "pymes")
 public class PymeEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private UUID id;
+    @Column(name = "pyme_id", updatable = false, nullable = false, length = 36)
+    private String id;
 
-    private String businessName;
+    @Column(name = "name", length = 255, unique = true, nullable = false)
+    private String name;
 
+    @Column(name = "email", length = 255, unique = true, nullable = false)
     private String email;
 
-    private String phone;
-
+    @Column(name = "password", length = 255, nullable = false)
     private String password;
 
+    @Column(name = "address", length = 255)
     private String address;
 
+    @Column(name = "phone", length = 50)
+    private String phone;
+
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
+    @Column(name = "logo_url", length = 255,  nullable = false)
+    private String logoUrl;
+
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive = true;
+
     @OneToMany(mappedBy = "pyme", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ProductEntity> products;
+    private List<ProductEntity> products = new ArrayList<>();
+
+    @PrePersist
+    public void generarId() {
+        if (this.id == null) {
+            this.id = UUID.randomUUID().toString();
+        }
+    }
 
     // Getters and Setters
-    public UUID getId() { return id; }
-    public void setId(UUID id) { this.id = id; }
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
 
-    public String getBusinessName() { return businessName; }
-    public void setBusinessName(String businessName) { this.businessName = businessName; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
