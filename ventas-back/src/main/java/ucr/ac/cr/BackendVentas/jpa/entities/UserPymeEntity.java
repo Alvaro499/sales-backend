@@ -4,18 +4,21 @@ import jakarta.persistence.*;
 
 import java.util.UUID;
 
+import org.hibernate.annotations.GenericGenerator;
+
+
 @Entity
 @Table(name = "user_pymes")
 public class UserPymeEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_pyme_id")
-    private Integer id;
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(name = "user_pyme_id",  columnDefinition = "UUID", updatable = false, nullable = false)
+    private UUID id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
-    private UserEntity user;
+    @Column(name = "user_id", columnDefinition = "UUID", nullable = false)
+    private UUID userId;
 
     @ManyToOne
     @JoinColumn(name = "pyme_id", referencedColumnName = "pyme_id", nullable = false)
@@ -23,17 +26,4 @@ public class UserPymeEntity {
 
     @Column(name = "is_owner")
     private boolean isOwner = false;
-
-    // Getters y Setters
-    public Integer getId() { return this.id; }
-    public void setId(Integer id) { this.id = id; }
-
-    public UserEntity getUser() { return this.user; }
-    public void setUser(UserEntity user) { this.user = user; }
-
-    public PymeEntity getPyme() { return this.pyme; }
-    public void setPyme(PymeEntity pyme) { this.pyme = pyme; }
-
-    public boolean isOwner() { return this.isOwner; }
-    public void setOwner(boolean owner) { this.isOwner = owner; }
 }
