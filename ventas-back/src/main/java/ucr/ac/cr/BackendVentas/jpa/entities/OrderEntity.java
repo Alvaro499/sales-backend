@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import org.hibernate.annotations.CreationTimestamp; 
 import org.hibernate.annotations.GenericGenerator;
 
 
@@ -26,6 +27,7 @@ public class OrderEntity {
     @JoinColumn(name = "pyme_id", referencedColumnName = "pyme_id", nullable = false)
     private PymeEntity pyme;
 
+    @CreationTimestamp
     @Column(name = "order_date", nullable = false)
     private LocalDateTime orderDate;
 
