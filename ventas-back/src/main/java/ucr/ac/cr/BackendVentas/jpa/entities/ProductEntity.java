@@ -1,11 +1,15 @@
 package ucr.ac.cr.BackendVentas.jpa.entities;
 
+
 import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.hibernate.annotations.CreationTimestamp; 
 import org.hibernate.annotations.GenericGenerator;
 
 
@@ -28,6 +32,10 @@ public class ProductEntity {
 
     @Column(name = "description", columnDefinition = "TEXT", nullable = true)
     private String description;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false, nullable = false)
+    private LocalDateTime createdAt;
 
     @Column(name = "price", nullable = false)
     private BigDecimal price;
