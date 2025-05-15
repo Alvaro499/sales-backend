@@ -2,74 +2,56 @@ package ucr.ac.cr.BackendVentas.jpa.entities;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import org.hibernate.annotations.GenericGenerator;
+
 
 @Entity
 @Table(name = "products")
 public class ProductEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(name = "product_id", columnDefinition = "UUID", updatable = false, nullable = false)
     private UUID id;
 
-    private String name;
-
-    private String description;
-
-    private BigDecimal price;
-
-    private String category;
-
-    @ElementCollection
-    @CollectionTable(name = "product_images", joinColumns = @JoinColumn(name = "product_id"))
-    @Column(name = "image_url")
-    private List<String> images;
-
-    private Boolean available;
-
-    private String promotion;
-
-    @Column(name = "published")
-    private Boolean published = true;
-
-    private Integer stock;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "pyme_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "pyme_id", referencedColumnName = "pyme_id", nullable = false)
     private PymeEntity pyme;
 
-    // Getters and Setters
-    public UUID getId() { return id; }
-    public void setId(UUID id) { this.id = id; }
+    @Column(name = "name", length = 255, nullable = false)
+    private String name;
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    @Column(name = "description", columnDefinition = "TEXT", nullable = true)
+    private String description;
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    @Column(name = "price", nullable = false)
+    private BigDecimal price;
 
-    public BigDecimal getPrice() { return price; }
-    public void setPrice(BigDecimal price) { this.price = price; }
+    @Column(name = "available", nullable = false)
+    private Boolean available = true; 
 
-    public String getCategory() { return category; }
-    public void setCategory(String category) { this.category = category; }
+    @Column(name = "promotion", nullable = true)
+    private BigDecimal promotion;
 
-    public List<String> getImages() { return images; }
-    public void setImages(List<String> images) { this.images = images; }
+    @Column(name = "stock", nullable = false)
+    private Integer stock;
 
-    public Boolean getAvailable() { return available; }
-    public void setAvailable(Boolean available) { this.available = available; }
+    @Column(name = "url_img", length = 512, nullable = true)
+    private String urlImg;
 
-    public String getPromotion() { return promotion; }
-    public void setPromotion(String promotion) { this.promotion = promotion; }
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive = true;
 
-    public Boolean getPublished() { return published; }
-    public void setPublished(Boolean published) { this.published = published; }
-
-    public Integer getStock() { return stock; }
-    public void setStock(Integer stock) { this.stock = stock; }
-
-    public PymeEntity getPyme() { return pyme; }
-    public void setPyme(PymeEntity pyme) { this.pyme = pyme; }
+    @ManyToMany
+    @JoinTable(
+        name = "product_categories",
+        joinColumns = @JoinColumn(name = "product_id"),
+        inverseJoinColumns = @JoinColumn(name = "category_id")
+    )
+    private List<CategoryEntity> categories = new ArrayList<>();
 }
