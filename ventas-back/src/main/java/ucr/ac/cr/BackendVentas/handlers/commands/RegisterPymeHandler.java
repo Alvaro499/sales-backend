@@ -1,7 +1,5 @@
 package ucr.ac.cr.BackendVentas.handlers.commands;
 
-import ucr.ac.cr.BackendVentas.api.types.RegisterPymeRequest;
-
 import java.util.UUID;
 
 public interface RegisterPymeHandler {
