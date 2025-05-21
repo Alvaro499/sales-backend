@@ -21,14 +21,6 @@ spring:
     listener:
       ack-mode: record
 
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-
 server:
   port: ${SERVER_PORT:8084}
 
