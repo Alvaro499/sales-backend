@@ -38,9 +38,10 @@ public class RegisterPymeHandlerImpl implements RegisterPymeHandler {
         pyme.setPhone(command.phone());
         pyme.setAddress(command.address());
         pyme.setPassword(command.password()); //TODO: Hash a la contraseña
+        pyme.setDescription(command.description());
 
         PymeEntity savedPyme = pymeRepository.save(pyme);
-        emailService.sendEmailEvent(savedPyme.getEmail()); //TODO: Completar
+        //emailService.sendEmailEvent(savedPyme.getEmail()); //TODO: Completar
         return new Result.Success(savedPyme.getId());
     }
 

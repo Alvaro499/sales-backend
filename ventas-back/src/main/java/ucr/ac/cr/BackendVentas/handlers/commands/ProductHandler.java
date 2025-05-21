@@ -18,7 +18,7 @@ public interface ProductHandler {
     }
 
     // Command for creating a product
-    record Command(String name, String description, BigDecimal price, String category, List<String> images,
+    record Command(String name, String description, BigDecimal price, List<String> category, List<String> images,
                    Boolean available, String promotion, Integer stock, UUID pymeId) {}
 
     // Command for unpublishing a product

@@ -33,7 +33,7 @@ public class ProductHandlerImpl implements ProductHandler {
         }
 
         // Check if Pyme exists for product creation
-        Optional<PymeEntity> pymeOptional = pymeRepository.findById(String.valueOf(command.pymeId()));
+        Optional<PymeEntity> pymeOptional = pymeRepository.findById(command.pymeId());
         if (pymeOptional.isEmpty()) {
             return new Result.PymeNotFound();
         }
@@ -48,7 +48,7 @@ public class ProductHandlerImpl implements ProductHandler {
         product.setPromotion(new BigDecimal(command.promotion()));
         product.setUrlImg(command.images());
         product.setAvailable(command.available());
-        List<String> categoryIds = Collections.singletonList(command.category());
+        List<String> categoryIds = command.category();
         List<CategoryEntity> categories = new ArrayList<>();
         for (String idStr : categoryIds) {
             CategoryEntity category = new CategoryEntity();

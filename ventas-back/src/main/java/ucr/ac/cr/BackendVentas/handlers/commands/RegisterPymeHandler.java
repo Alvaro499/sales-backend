@@ -12,6 +12,6 @@ public interface RegisterPymeHandler {
         record AlreadyExists() implements Result {}
     }
 
-    record Command(String pymeName, String email, String phone, String address, String password) {}
+    record Command(String pymeName, String email, String phone, String address, String password, String description) {}
 
 }
