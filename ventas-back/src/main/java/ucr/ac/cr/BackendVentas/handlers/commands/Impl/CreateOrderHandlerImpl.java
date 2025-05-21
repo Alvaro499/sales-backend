@@ -7,6 +7,7 @@ import ucr.ac.cr.BackendVentas.handlers.queries.PaymentMethodQuery;
 import ucr.ac.cr.BackendVentas.handlers.queries.ProductQuery;
 import ucr.ac.cr.BackendVentas.handlers.queries.ShippingMethodQuery;
 import ucr.ac.cr.BackendVentas.jpa.entities.ProductEntity;
+import ucr.ac.cr.BackendVentas.jpa.entities.PymeEntity;
 import ucr.ac.cr.BackendVentas.models.OrderProduct;
 
 import java.util.*;
@@ -32,117 +33,209 @@ public class CreateOrderHandlerImpl implements CreateOrderHandler {
     @Override
     public Result handle(Command command) {
 
-        UUID userId = null;
-        boolean isValidEmail = validateEmail(command.email());
-        boolean isValidFirstName = validateName(command.firstName());
-        boolean isValidLastName = validateName(command.lastName());
-        boolean isValidPhone = validatePhone(command.phone());
-        boolean isValidShippingAddress = validateShippingAddress(command.shippingAddress());
-        boolean isValidPaymentMethod = validatePaymentMethod(command.paymentMethod());
-        boolean isValidShippingMethod = validateShippingMethod(command.shippingMethod());
-        boolean isValidProducts = validateProducts(command.products());
-        boolean isStockAvaliable = validateStock(command.products());
-
-
-        // Validación general de campos
-        boolean isValidFields = isValidEmail
-                                && isValidFirstName
-                                && isValidLastName
-                                && isValidPhone
-                                && isValidShippingAddress
-                                && isValidPaymentMethod
-                                && isValidShippingMethod
-                                && isValidProducts
-                                && isStockAvaliable;
-
-        if (!isValidFields) {
-
-            // Por simplicidad solo se envia un mensaje con los campos inválidos detectados
-            List<String> invalidFields = new java.util.ArrayList<>();
-            if (!isValidEmail) invalidFields.add("email");
-            if (!isValidFirstName) invalidFields.add("firstName");
-            if (!isValidLastName) invalidFields.add("lastName");
-            if (!isValidPhone) invalidFields.add("phone");
-            if (!isValidShippingAddress) invalidFields.add("shippingAddress");
-            if (!isValidPaymentMethod) invalidFields.add("paymentMethod");
-            if (!isValidShippingMethod) invalidFields.add("shippingMethod");
-            if (!isValidProducts) invalidFields.add("products");
-
-            return new Result.InvalidFields(invalidFields.toArray(new String[0]));
-        }
-        return new Result.Success(userId);
-
-    }
-
-    // Métodos privados para validaciones
-
-    private boolean validateEmail(String email) {
-        if (email == null || email.isBlank()) return false;
-        // Validación simple de email con regex
-        return email.matches("^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}$");
-    }
-
-    private boolean validateName(String name) {
-
-        return name != null && !name.isBlank() && name.length() <= 100;
-    }
-
-    private boolean validatePhone(String phone) {
-        if (phone == null || phone.isBlank()) return false;
-        // Validar solo números
-        //return phone.matches("\\d{7,15}");
-        return phone.matches("[\\d-]{7,15}"); //con guion
-
-    }
-
-    private boolean validateShippingAddress(String address) {
-        return address != null && !address.isBlank() && address.length() <= 200;
-    }
-
-    private boolean validateProducts(List<OrderProduct> products) {
-        if (products == null || products.isEmpty()) return false;
-
-        for (OrderProduct p : products) {
-            if (p.productId() == null || p.quantity() <= 0) return false;
-
-            // Validar que el producto exista y esté activo/disponible
-            Optional<ProductEntity> product = productQuery.findById(p.productId());
-            if (product.isEmpty()) return false;
-
-            ProductEntity pEntity = product.get();
-            if (!pEntity.getIsActive() || !pEntity.getAvailable()) return false;
+        //Como el carrito trae productos de varias pymes, los separamos y agrupamos por pymes
+        //Map ===>>> [clave] = pyme ; [valor] = lista de productos
+        Map<PymeEntity, List<OrderProduct>> productsByPyme;
+        try {
+            productsByPyme = groupProductsByPyme(command.products());
+        } catch (NoSuchElementException e) {
+            return new Result.InvalidFields("Problemas con Lista de Productos",new String[]{"products"});
         }
 
-        return true;
+        Result emailValidation = validateEmail(command.email());
+        if (emailValidation != null) return emailValidation;
+
+        Result nameValidation = validateName("firstName", command.firstName());
+        if (nameValidation != null) return nameValidation;
+
+        Result lastNameValidation = validateName("lastName", command.lastName());
+        if (lastNameValidation != null) return lastNameValidation;
+
+        Result phoneValidation = validatePhone(command.phone());
+        if (phoneValidation != null) return phoneValidation;
+
+        Result addressValidation = validateShippingAddress(command.shippingAddress());
+        if (addressValidation != null) return addressValidation;
+
+        Result paymentMethodValidation = validatePaymentMethod(command.paymentMethod());
+        if (paymentMethodValidation != null) return paymentMethodValidation;
+
+        Result shippingMethodValidation = validateShippingMethod(command.shippingMethod());
+        if (shippingMethodValidation != null) return shippingMethodValidation;
+
+        Result productValidation = validateProducts(productsByPyme);
+        if (productValidation != null) return productValidation;
+
+        Result stockValidation = validateStock(productsByPyme);
+        if (stockValidation != null) return stockValidation;
+
+        UUID orderId = UUID.randomUUID();
+        return new Result.Success(orderId);
     }
 
+    //Agrupar productos por PYME
+    private Map<PymeEntity, List<OrderProduct>> groupProductsByPyme(List<OrderProduct> products) {
+        Map<PymeEntity, List<OrderProduct>> groupedProductsByPyme = new HashMap<>();
 
-    public boolean validateStock(List<OrderProduct> products) {
         for (OrderProduct product : products) {
-            int availableStock = productQuery.getAvailableStock(product.productId());
-            boolean isStockSufficient = product.quantity() > 0 && product.quantity() <= availableStock;
+            ProductEntity productEntity = productQuery.findById(product.productId())
+                    .orElseThrow();
 
-            if (!isStockSufficient) {
-                return false;
+            groupedProductsByPyme.computeIfAbsent(productEntity.getPyme(), k -> new ArrayList<>()).add(product);
+        }
+        return groupedProductsByPyme;
+    }
+
+    private Result validateEmail(String email) {
+        if (email == null) {
+            return new Result.InvalidFields("El email no puede ser nulo", "email");
+        }
+        if (email.isBlank()) {
+            return new Result.InvalidFields("El email no puede estar vacío", "email");
+        }
+        if (!email.matches("^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
+            return new Result.InvalidFields("El formato del email es inválido", "email");
+        }
+        return null;
+    }
+
+    private Result validateName(String fieldName, String name) {
+        if (name == null) {
+            return new Result.InvalidFields("El campo " + fieldName + " no puede ser nulo", fieldName);
+        }
+        if (name.isBlank()) {
+            return new Result.InvalidFields("El campo " + fieldName + " no puede estar vacío", fieldName);
+        }
+        if (name.length() > 100) {
+            return new Result.InvalidFields("El campo " + fieldName + " no puede tener más de 100 caracteres", fieldName);
+        }
+        return null;
+    }
+
+    private Result validatePhone(String phone) {
+        if (phone == null) {
+            return new Result.InvalidFields("El teléfono no puede ser nulo", "phone");
+        }
+        if (phone.isBlank()) {
+            return new Result.InvalidFields("El teléfono no puede estar vacío", "phone");
+        }
+        if (!phone.matches("[\\d-]{7,15}")) {
+            return new Result.InvalidFields("El formato del teléfono es inválido", "phone");
+        }
+        return null;
+    }
+
+    //direccion exacta
+    private Result validateShippingAddress(String address) {
+        if (address == null) {
+            return new Result.InvalidFields("La dirección de envío no puede ser nula", "shippingAddress");
+        }
+        if (address.isBlank()) {
+            return new Result.InvalidFields("La dirección de envío no puede estar vacía", "shippingAddress");
+        }
+        if (address.length() > 200) {
+            return new Result.InvalidFields("La dirección de envío no puede tener más de 200 caracteres", "shippingAddress");
+        }
+        return null;
+    }
+
+
+    private Result validatePaymentMethod(String method) {
+        if (method == null) {
+            return new Result.InvalidFields("El método de pago no puede ser nulo", "paymentMethod");
+        }
+        if (method.isBlank()) {
+            return new Result.InvalidFields("El método de pago no puede estar vacío", "paymentMethod");
+        }
+        boolean existsAndActive = paymentMethodQuery.existsByNameIgnoreCaseAndIsActiveTrue(method);
+        if (!existsAndActive) {
+            return new Result.InvalidFields("El método de pago no es válido o no está activo", "paymentMethod");
+        }
+        return null;
+    }
+
+    //método de envío
+    private Result validateShippingMethod(String method) {
+        if (method == null){
+            return new Result.InvalidFields("El método de envío no puede ser nulo", "shippingMethod");
+        }
+
+        if (method.isBlank()) {
+            return new Result.InvalidFields("El método de envío no puede estar vacío","shippingMethod");
+        }
+
+        boolean existsAndActive = shippingMethodQuery.existsByNameIgnoreCaseAndIsActiveTrue(method);
+        if (!existsAndActive) {
+            return new Result.InvalidFields("El método de pago no es válido o no está activo","shippingMethod");
+        }
+        return null;
+    }
+
+    //Se usa el DTO "OrderProduct de Models"
+    private Result validateProducts(Map<PymeEntity, List<OrderProduct>> productsByPyme) {
+        for (Map.Entry<PymeEntity, List<OrderProduct>> entry : productsByPyme.entrySet()) {
+            for (OrderProduct orderedProduct : entry.getValue()) {
+
+                if (orderedProduct.productId() == null) {
+                    return new Result.InvalidFields("El ID del producto es obligatorio", "products");
+                }
+
+                if (orderedProduct.quantity() <= 0) {
+                    return new Result.InvalidFields("La cantidad debe ser mayor que cero", "products");
+                }
+
+                Optional<ProductEntity> foundProduct = productQuery.findById(orderedProduct.productId());
+                if (foundProduct.isEmpty()) {
+                    return new Result.NotFound("Producto no encontrado: " + orderedProduct.productId());
+                }
+
+                ProductEntity productEntity = foundProduct.get();
+
+                if (!productEntity.getIsActive() || !productEntity.getAvailable()) {
+                    return new Result.InvalidFields(
+                            "El producto '" + productEntity.getName() + "' no está disponible",
+                            "products"
+                    );
+                }
             }
         }
-        return true;
+        return null;
     }
 
-    private boolean validatePaymentMethod(String method) {
-        boolean isNotBlank = method != null && !method.isBlank();
-        boolean existsAndActive = isNotBlank && paymentMethodQuery.existsByNameIgnoreCaseAndIsActiveTrue(method);
-        return existsAndActive;
+    //Se usa el DTO "OrderProduct de Models"
+    private Result validateStock(Map<PymeEntity, List<OrderProduct>> productsByPyme) {
+        for (Map.Entry<PymeEntity, List<OrderProduct>> entry : productsByPyme.entrySet()) {
+            for (OrderProduct orderedProduct : entry.getValue()) {
+
+                if (orderedProduct.quantity() <= 0) {
+                    return new Result.InvalidFields("La cantidad debe ser mayor que cero", "products");
+                }
+
+                Optional<ProductEntity> foundProduct = productQuery.findById(orderedProduct.productId());
+                if (foundProduct.isEmpty()) {
+                    return new Result.NotFound("Producto no encontrado: " + orderedProduct.productId());
+                }
+
+                ProductEntity product = foundProduct.get();
+                int availableStock = product.getStock();
+
+                if (orderedProduct.quantity() > availableStock) {
+                    return new Result.InvalidFields(
+                            "El producto '" + product.getName() + "' no tiene suficiente stock. " +
+                                    "Pedido: " + orderedProduct.quantity() + ", Disponible: " + availableStock,
+                            "products"
+                    );
+                }
+            }
+        }
+        return null;
     }
 
-    private boolean validateShippingMethod(String method) {
-        boolean isNotBlank = method != null && !method.isBlank();
-        boolean existsAndActive = isNotBlank && shippingMethodQuery.existsByNameIgnoreCaseAndIsActiveTrue(method);
-        return existsAndActive;
-    }
 
+    //Considerar si manejar ERROR_CODE para los Result
+    //¿Un método para verificar pymes, usuarios??
 
-    //¿Un método para manejar PYMES??
+    //Falta la logica de Crear los Orders y OrderLines (siguiente spring)
 
     private boolean validatePyme(List<OrderProduct> products) {
         if (products == null || products.isEmpty()) return false;
@@ -161,17 +254,6 @@ public class CreateOrderHandlerImpl implements CreateOrderHandler {
         return true;
     }
 
-    /*
-    private boolean checkUserExists(UUID userId) {
-        return userId != null;
-    }
-    */
-
-    /*
-    private UUID createOrder(Command command) {
-        return UUID.randomUUID();
-    }
-    */
 
 }
 

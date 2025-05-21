@@ -1,4 +1,9 @@
 package ucr.ac.cr.BackendVentas.models;
 
-public class OrderProduct {
-}
+import java.math.BigDecimal;
+import java.util.UUID;
+
+public record OrderProduct(
+        UUID productId,
+        int quantity
+) {}
