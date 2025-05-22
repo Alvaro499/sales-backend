@@ -1,12 +1,12 @@
 spring:
   application:
-    name: BackVentas
+    name: ventas-back
 
   datasource:
-    url: jdbc:h2:mem:testdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+    url: jdbc:postgresql://localhost:5432/ventas
+    driver-class-name: org.postgresql.Driver
+    username: myuser
+    password: mypassword
 
   jpa:
     hibernate:
@@ -16,10 +16,11 @@ spring:
       hibernate:
         format_sql: true
 
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
 server:
   port: ${SERVER_PORT:8082}

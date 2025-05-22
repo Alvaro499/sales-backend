@@ -23,7 +23,8 @@ public class RegisterPymeController {
                 request.email(),
                 request.phone(),
                 request.address(),
-                request.password()
+                request.password(),
+                request.description()
         );
 
         var result = registerPymeHandler.handle(command);

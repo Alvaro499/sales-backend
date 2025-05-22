@@ -8,7 +8,7 @@ public record ProductRequest(
         String name,
         String description,
         BigDecimal price,
-        String category,
+        List<String> category,
         List<String> images,
         Boolean available,
         String promotion,

@@ -3,14 +3,12 @@ package ucr.ac.cr.BackendVentas.api.rests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ucr.ac.cr.BackendVentas.handlers.commands.ProductHandler;
-import ucr.ac.cr.BackendVentas.jpa.entities.ProductEntity;
 import ucr.ac.cr.BackendVentas.models.BaseException;
 import ucr.ac.cr.BackendVentas.models.ErrorCode;
 import ucr.ac.cr.BackendVentas.api.types.ProductRequest;
 import ucr.ac.cr.BackendVentas.api.types.Response;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/products")

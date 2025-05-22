@@ -5,5 +5,6 @@ public record RegisterPymeRequest(
     String email,
     String phone,
     String address,
-    String password
+    String password,
+    String description
 ) {}

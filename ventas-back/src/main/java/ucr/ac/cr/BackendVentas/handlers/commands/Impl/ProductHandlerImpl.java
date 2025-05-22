@@ -3,13 +3,14 @@ package ucr.ac.cr.BackendVentas.handlers.commands.Impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ucr.ac.cr.BackendVentas.handlers.commands.ProductHandler;
+import ucr.ac.cr.BackendVentas.jpa.entities.CategoryEntity;
 import ucr.ac.cr.BackendVentas.jpa.entities.ProductEntity;
 import ucr.ac.cr.BackendVentas.jpa.entities.PymeEntity;
 import ucr.ac.cr.BackendVentas.jpa.repositories.ProductRepository;
 import ucr.ac.cr.BackendVentas.jpa.repositories.PymeRepository;
 
 import java.math.BigDecimal;
-import java.util.Optional;
+import java.util.*;
 
 @Component
 public class ProductHandlerImpl implements ProductHandler {
@@ -32,7 +33,7 @@ public class ProductHandlerImpl implements ProductHandler {
         }
 
         // Check if Pyme exists for product creation
-        Optional<PymeEntity> pymeOptional = pymeRepository.findById(String.valueOf(command.pymeId()));
+        Optional<PymeEntity> pymeOptional = pymeRepository.findById(command.pymeId());
         if (pymeOptional.isEmpty()) {
             return new Result.PymeNotFound();
         }
@@ -44,11 +45,18 @@ public class ProductHandlerImpl implements ProductHandler {
         product.setName(command.name());
         product.setDescription(command.description());
         product.setPrice(command.price());
-        product.setCategory(command.category());
-        product.setImages(command.images());
+        product.setPromotion(new BigDecimal(command.promotion()));
+        product.setUrlImg(command.images());
         product.setAvailable(command.available());
-        product.setPromotion(command.promotion());
-        product.setPublished(true);  // Initially published
+        List<String> categoryIds = command.category();
+        List<CategoryEntity> categories = new ArrayList<>();
+        for (String idStr : categoryIds) {
+            CategoryEntity category = new CategoryEntity();
+            category.setId(Integer.valueOf(idStr));
+            categories.add(category);
+        }
+        product.setCategories(categories);
+        product.setActive(true);  // Initially active
         product.setStock(command.stock());
         product.setPyme(pyme);
 
@@ -65,7 +73,7 @@ public class ProductHandlerImpl implements ProductHandler {
         }
 
         ProductEntity product = productOptional.get();
-        product.setPublished(false);  // Unpublish the product
+        product.setActive(false);  // Unpublish the product
         productRepository.save(product);
 
         return new Result.Success(product);
@@ -78,7 +86,7 @@ public class ProductHandlerImpl implements ProductHandler {
         }
 
         ProductEntity product = productOptional.get();
-        product.setPromotion(command.promotion());  // Apply the promotion
+        product.setPromotion(new BigDecimal(command.promotion()));  // Apply the promotion
         productRepository.save(product);
 
         return new Result.Success(product);

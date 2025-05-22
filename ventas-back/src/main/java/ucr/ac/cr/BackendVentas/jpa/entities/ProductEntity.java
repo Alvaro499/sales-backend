@@ -50,7 +50,7 @@ public class ProductEntity {
     private Integer stock;
 
     @Column(name = "url_img", length = 512, nullable = true)
-    private String urlImg;
+    private List<String> urlImg;
 
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
@@ -62,4 +62,100 @@ public class ProductEntity {
         inverseJoinColumns = @JoinColumn(name = "category_id")
     )
     private List<CategoryEntity> categories = new ArrayList<>();
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public PymeEntity getPyme() {
+        return pyme;
+    }
+
+    public void setPyme(PymeEntity pyme) {
+        this.pyme = pyme;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
+
+    public Boolean getAvailable() {
+        return available;
+    }
+
+    public void setAvailable(Boolean available) {
+        this.available = available;
+    }
+
+    public BigDecimal getPromotion() {
+        return promotion;
+    }
+
+    public void setPromotion(BigDecimal promotion) {
+        this.promotion = promotion;
+    }
+
+    public Integer getStock() {
+        return stock;
+    }
+
+    public void setStock(Integer stock) {
+        this.stock = stock;
+    }
+
+    public List<String> getUrlImg(List<String> images) {
+        return urlImg;
+    }
+
+    public void setUrlImg(List<String> urlImg) {
+        this.urlImg = urlImg;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
+    }
+
+    public List<CategoryEntity> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(List<CategoryEntity> categories) {
+        this.categories = categories;
+    }
 }

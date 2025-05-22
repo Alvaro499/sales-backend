@@ -1,7 +1,5 @@
 package ucr.ac.cr.BackendVentas.handlers.commands;
 
-import ucr.ac.cr.BackendVentas.api.types.RegisterPymeRequest;
-
 import java.util.UUID;
 
 public interface RegisterPymeHandler {
@@ -14,6 +12,6 @@ public interface RegisterPymeHandler {
         record AlreadyExists() implements Result {}
     }
 
-    record Command(String pymeName, String email, String phone, String address, String password) {}
+    record Command(String pymeName, String email, String phone, String address, String password, String description) {}
 
 }

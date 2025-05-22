@@ -11,8 +11,8 @@ spring:
   cloud:
     gateway:
       routes:
-        - id: basic-service
-          uri: lb://basic-service
+        - id: ventas-back
+          uri: lb://ventas-back
           predicates:
             - Path=/api/public/basic/**, /api/private/basic/**
         - id: authentication-service
