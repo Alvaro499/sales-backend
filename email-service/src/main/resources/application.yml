@@ -5,8 +5,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: cambiar@gmail.com # TODO: Cambiar email
-    password: password
+    username: ventas.pymes25@gmail.com
+    password: jxfz zgpa yikp ahmt
     properties:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true

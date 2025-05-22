@@ -10,7 +10,7 @@ public class UserRegisterListener {
     @Autowired
     private EmailService emailService;
 
-    @KafkaListener(topics = "user-registered", groupId = "mail-service")
+    @KafkaListener(topics = "user-registered2", groupId = "mail-service")
     public void consume(String email) {
         emailService.sendSimpleEmail(email, "Bienvenido a la plataforma", "Gracias por registrarte.");
     }

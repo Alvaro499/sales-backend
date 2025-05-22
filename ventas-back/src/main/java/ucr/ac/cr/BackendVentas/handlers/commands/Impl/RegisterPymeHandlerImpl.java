@@ -41,7 +41,8 @@ public class RegisterPymeHandlerImpl implements RegisterPymeHandler {
         pyme.setDescription(command.description());
 
         PymeEntity savedPyme = pymeRepository.save(pyme);
-        //emailService.sendEmailEvent(savedPyme.getEmail()); //TODO: Completar
+
+        emailService.sendEmailEvent(savedPyme.getEmail());
         return new Result.Success(savedPyme.getId());
     }
 
