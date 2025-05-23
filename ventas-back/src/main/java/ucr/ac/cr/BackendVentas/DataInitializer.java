@@ -95,7 +95,7 @@ public class DataInitializer {
         p.setPrice(price);
         p.setStock(stock);
         p.setAvailable(true);
-        p.setIsActive(true);
+        p.setActive(true);
         p.setCategories(List.of(category));
         p.setPyme(pyme);
         return p;
@@ -114,7 +114,7 @@ public class DataInitializer {
         s.setName(name);
         s.setDescription(desc);
         s.setCost(cost);
-        s.setIsActive(isActive);
+        s.setActive(isActive);
         return s;
     }
 }

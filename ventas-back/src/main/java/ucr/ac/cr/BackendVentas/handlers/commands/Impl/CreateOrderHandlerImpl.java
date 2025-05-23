@@ -191,7 +191,7 @@ public class CreateOrderHandlerImpl implements CreateOrderHandler {
 
                 ProductEntity productEntity = foundProduct.get();
 
-                if (!productEntity.getIsActive() || !productEntity.getAvailable()) {
+                if (!productEntity.isActive() || !productEntity.getAvailable()) {
                     return new Result.InvalidFields(
                             "El producto '" + productEntity.getName() + "' no está disponible",
                             "products"
@@ -248,7 +248,7 @@ public class CreateOrderHandlerImpl implements CreateOrderHandler {
             if (product.isEmpty()) return false;
 
             ProductEntity pEntity = product.get();
-            if (!pEntity.getIsActive() || !pEntity.getAvailable()) return false;
+            if (!pEntity.isActive() || !pEntity.getAvailable()) return false;
         }
 
         return true;
