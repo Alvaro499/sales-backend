@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+pandas
+scikit-learn
+mlxtend
+psycopg2-binary
+SQLAlchemy
