@@ -65,21 +65,41 @@ public class ProductHandlerImpl implements ProductHandler {
         return new Result.Success(savedProduct);
     }
 
-    // Additional methods for unpublishing, applying promotion, and changing availability/stock
-    private Result unpublishProduct(UnpublishProductCommand command) {
-        Optional<ProductEntity> productOptional = productRepository.findById(command.productId());
-        if (productOptional.isEmpty()) {
-            return new Result.NotFoundProduct();
+
+    public Result listProductsByPyme(UUID pymeId) {
+        Optional<PymeEntity> pymeOptional = pymeRepository.findById(pymeId);
+        if (pymeOptional.isEmpty()) {
+            return new Result.PymeNotFound();  // Use PymeNotFound if no Pyme is found
         }
 
-        ProductEntity product = productOptional.get();
-        product.setActive(false);  // Unpublish the product
-        productRepository.save(product);
+        PymeEntity pyme = pymeOptional.get();
+        List<ProductEntity> products = productRepository.findByPyme(pyme);
 
-        return new Result.Success(product);
+        if (products.isEmpty()) {
+            return new Result.NotFoundProduct();  // If no products are found
+        }
+
+        // Return the list of products wrapped in the SuccessList record
+        return new Result.SuccessList(products);  // Returning the list of products wrapped in SuccessList
     }
 
-    private Result applyPromotion(ApplyPromotionCommand command) {
+
+
+    public Result unpublishProduct(UnpublishProductCommand command) {
+            Optional<ProductEntity> productOptional = productRepository.findById(command.productId());
+            if (productOptional.isEmpty()) {
+                return new Result.NotFoundProduct();
+            }
+
+            ProductEntity product = productOptional.get();
+            product.setActive(false);  // Unpublish the product
+            productRepository.save(product);
+
+            return new Result.Success(product);
+        }
+
+
+    public Result applyPromotion(ApplyPromotionCommand command) {
         Optional<ProductEntity> productOptional = productRepository.findById(command.productId());
         if (productOptional.isEmpty()) {
             return new Result.NotFoundProduct();
@@ -92,15 +112,18 @@ public class ProductHandlerImpl implements ProductHandler {
         return new Result.Success(product);
     }
 
-    private Result changeAvailabilityAndStock(ChangeAvailabilityAndStockCommand command) {
+    public Result changeAvailabilityAndStock(ChangeAvailabilityAndStockCommand command) {
         Optional<ProductEntity> productOptional = productRepository.findById(command.productId());
         if (productOptional.isEmpty()) {
             return new Result.NotFoundProduct();
         }
-
         ProductEntity product = productOptional.get();
-        product.setAvailable(command.available());  // Change availability
-        product.setStock(command.stock());  // Update stock
+        if(command.available() != null){
+            product.setAvailable(command.available());  // Change availability
+        }
+        if(command.stock() != null){
+            product.setStock(command.stock());  // Update stock
+        }
         productRepository.save(product);
 
         return new Result.Success(product);
