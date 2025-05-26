@@ -1,0 +1,21 @@
+# Git
+.git
+.gitignore
+
+# IDEs
+.idea
+.vscode
+
+# Gradle cache
+.gradle
+build/
+out/
+
+# Logs y temporales
+*.log
+*.tmp
+*.swp
+
+# Sistema
+.DS_Store
+Thumbs.db
