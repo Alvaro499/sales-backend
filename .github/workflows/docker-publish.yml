@@ -20,7 +20,6 @@ jobs:
 
       - name: Build and run services
         run: |
-          cd ventas-backend
           docker-compose up -d --build
           sleep 30
           docker ps -a
@@ -28,7 +27,6 @@ jobs:
       - name: Shut down services
         if: always()
         run: |
-          cd ventas-backend
           docker-compose down
 
   push-to-dockerhub:
@@ -52,7 +50,6 @@ jobs:
 
       - name: Build and push images
         run: |
-          cd ventas-backend
           SERVICES="eureka gateway authentication-service email-service ventas-back recommendation-service"
           for SERVICE in $SERVICES; do
             docker build -t $DOCKERHUB_USERNAME/$SERVICE:latest $SERVICE
