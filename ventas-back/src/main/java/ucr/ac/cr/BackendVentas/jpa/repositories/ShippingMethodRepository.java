@@ -5,9 +5,11 @@ import org.springframework.stereotype.Repository;
 import ucr.ac.cr.BackendVentas.jpa.entities.PaymentMethodEntity;
 import ucr.ac.cr.BackendVentas.jpa.entities.ShippingMethodEntity;
 
+import java.util.Optional;
+
 @Repository
 public interface ShippingMethodRepository  extends JpaRepository<ShippingMethodEntity, Integer> {
     boolean existsByNameIgnoreCaseAndIsActiveTrue(String name);
-
+    Optional<ShippingMethodEntity> findByName (String name);
 }
 
