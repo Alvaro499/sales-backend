@@ -66,20 +66,20 @@ public class ProductController {
 
         var result = productHandler.listProductsByPyme(pymeId);
 
-        // Directly handling result without switch statement
-        if (result instanceof ProductHandler.Result.Success success) {
-            return new Response("Products retrieved", success.product());  // Assumes success.product() returns a list of products
+        if (result instanceof ProductHandler.Result.SuccessList successList) {
+            return new Response("Products retrieved", successList.products());
         } else if (result instanceof ProductHandler.Result.PymeNotFound) {
             throw BaseException.exceptionBuilder()
                     .code(ErrorCode.PYME_NOT_FOUND)
                     .message("Pyme not found")
                     .build();
         } else if (result instanceof ProductHandler.Result.NotFoundProduct) {
-            return new Response("No products found", null);  // Return empty response if no products found
+            return new Response("No products found", null);
         } else {
             throw new IllegalStateException("Unexpected result: " + result);
         }
     }
+
 
     @PutMapping("/unpublish/{productId}")
     public Response unpublishProduct(@PathVariable UUID productId) {

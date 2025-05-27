@@ -1,5 +1,6 @@
 package ucr.ac.cr.BackendVentas.jpa.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.util.ArrayList; 
 import java.util.List;
@@ -42,6 +43,7 @@ public class PymeEntity {
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "pyme", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductEntity> products = new ArrayList<>();
 
