@@ -6,10 +6,11 @@ public interface RegisterPymeHandler {
 
     Result handle(Command command);
 
-    sealed interface Result permits Result.Success, Result.InvalidFields, Result.AlreadyExists {
+    sealed interface Result permits Result.Success, Result.InvalidFields, Result.EmailAlreadyExist, Result.NameAlreadyExist {
         record Success(UUID pymeId) implements Result {}
         record InvalidFields(String... fields) implements Result {}
-        record AlreadyExists() implements Result {}
+        record EmailAlreadyExist() implements Result {}
+        record NameAlreadyExist() implements Result {}
     }
 
     record Command(String pymeName, String email, String phone, String address, String password, String description) {}
