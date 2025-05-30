@@ -27,10 +27,15 @@ public class RegisterPymeHandlerImpl implements RegisterPymeHandler {
             return invalidFields;
         }
 
-        boolean exists = pymeRepository.existsByEmail(command.email());
-        if (exists) {
-            return new Result.AlreadyExists();
+        boolean emailExist = pymeRepository.existsByEmail(command.email());
+        if (emailExist) {
+            return new Result.EmailAlreadyExist();
         }
+        boolean nameExist = pymeRepository.existsByName(command.pymeName());
+        if (nameExist) {
+            return new Result.NameAlreadyExist();
+        }
+
 
         PymeEntity pyme = new PymeEntity();
         pyme.setName(command.pymeName());
