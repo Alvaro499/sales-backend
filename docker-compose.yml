@@ -1,57 +1,66 @@
 version: '3.8'
 
 services:
-  # eureka
   eureka:
     build: ./eureka
     ports:
       - "8761:8761"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
 
-  # gateway
   gateway:
     build: ./gateway
     ports:
       - "8000:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
     depends_on:
       - eureka
 
-  # authentication-service
   authentication-service:
     build: ./authentication-service
     ports:
-      - "8001:8080"
+      - "8001:8083"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
     depends_on:
       - auth-db
       - eureka
 
-  # email-service
   email-service:
     build: ./email-service
     ports:
-      - "8002:8080"
+      - "8002:8084"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
     depends_on:
       - kafka
       - eureka
 
-  # ventas-back
   ventas-back:
     build: ./ventas-back
     ports:
-      - "8004:8080"
+      - "8004:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
     depends_on:
       - ventas-db
       - kafka
       - eureka
 
-  # recommendation-service
   recommendation-service:
     build: ./recommendation-service
     ports:
       - "8003:8000"
+    environment:
+      - DB_HOST=recommendation-db
+      - DB_PORT=5432
+      - DB_USER=recouser
+      - DB_PASS=recopass
+      - DB_NAME=recodb
     depends_on:
       - recommendation-db
 
-  # Kafka y Zookeeper
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
     environment:
@@ -72,7 +81,6 @@ services:
     depends_on:
       - zookeeper
 
-  # Bases de datos
   auth-db:
     image: postgres:15
     environment:
