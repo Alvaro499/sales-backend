@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ucr.ac.cr.authentication.api.types.RecoverPasswordRequest;
 import ucr.ac.cr.authentication.api.types.ResetPasswordRequest;
 import ucr.ac.cr.authentication.handlers.commands.RecoverPasswordHandler;
+import ucr.ac.cr.authentication.handlers.commands.ResetPasswordHandler;
 
 @RestController
 @CrossOrigin
@@ -22,12 +23,14 @@ public class RecoverPasswordController {
         return handleResult(handler.handle(command));
     }
 
+
+    /*
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
         var command = new ResetPasswordHandler.Command(request.token(), request.newPassword());
         return handleResultResetPassword(handler.handleResetPassword(command));
     }
-
+    */
 
     private ResponseEntity<?> handleResult(RecoverPasswordHandler.Result result) {
         return switch (result) {
@@ -42,6 +45,7 @@ public class RecoverPasswordController {
         };
     }
 
+    /*
     private ResponseEntity<?> handleResultResetPassword(ResetPasswordHandler.Result result) {
         // Manejar el resultado del reset password
         return switch (result) {
@@ -59,4 +63,5 @@ public class RecoverPasswordController {
                     ResponseEntity.status(500).body("Error interno.");
         };
     }
+    */
 }

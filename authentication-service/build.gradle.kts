@@ -23,6 +23,7 @@ dependencies {
     implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
     implementation("org.springframework.cloud:spring-cloud-starter-feign:1.4.7.RELEASE")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.kafka:spring-kafka")
     runtimeOnly("com.h2database:h2")
     implementation("org.springframework.security:spring-security-crypto:6.2.2")
     implementation("io.jsonwebtoken:jjwt:0.12.5")

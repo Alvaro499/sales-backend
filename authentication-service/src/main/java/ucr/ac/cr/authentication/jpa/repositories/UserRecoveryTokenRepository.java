@@ -10,5 +10,5 @@ import java.util.UUID;
 
 @Repository
 public interface UserRecoveryTokenRepository extends JpaRepository<UserRecoveryTokenEntity, UUID> {
-    Optional<UserRecoveryTokenEntity> findByToken(UUID token);
+    Optional<UserRecoveryTokenEntity> findByToken(String token);
 }

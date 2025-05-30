@@ -9,7 +9,6 @@ import ucr.ac.cr.authentication.jpa.repositories.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.UUID;
 
 public class ResetPasswordHandlerImpl implements ResetPasswordHandler {
 
@@ -29,7 +28,7 @@ public class ResetPasswordHandlerImpl implements ResetPasswordHandler {
         return null;
     }
 
-    public Result validateRecoveryToken(UUID token) {
+    public Result validateRecoveryToken(String token) {
         Optional<UserRecoveryTokenEntity> tokenOpt = userRecoveryTokenRepository.findByToken(token);
 
         if (tokenOpt.isEmpty()) {
@@ -49,7 +48,7 @@ public class ResetPasswordHandlerImpl implements ResetPasswordHandler {
         return new Result.Success();
     }
 
-    private Result resetPassword(UUID token, String newPassword) {
+    private Result resetPassword(String token, String newPassword) {
         Result validationResult = validateRecoveryToken(token);
         if (!(validationResult instanceof Result.Success)) {
             return validationResult;
@@ -68,7 +67,7 @@ public class ResetPasswordHandlerImpl implements ResetPasswordHandler {
         return new Result.Success();
     }
 
-    public void markTokenAsUsed(UUID token) {
+    public void markTokenAsUsed(String token) {
         Optional<UserRecoveryTokenEntity> tokenOpt = userRecoveryTokenRepository.findByToken(token);
 
         tokenOpt.ifPresent(t -> {

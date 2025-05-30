@@ -23,7 +23,7 @@ public class UserRecoveryTokenQueryImpl implements UserRecoveryTokenQuery {
     }
 
     @Override
-    public Optional<UserRecoveryTokenEntity> findByToken(UUID token) {
+    public Optional<UserRecoveryTokenEntity> findByToken(String token) {
         return repository.findByToken(token);
     }
 }

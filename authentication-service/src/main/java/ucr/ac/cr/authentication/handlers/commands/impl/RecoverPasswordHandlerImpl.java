@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-import ucr.ac.cr.BackendVentas.service.EmailService;
 import ucr.ac.cr.authentication.handlers.commands.RecoverPasswordHandler;
 import ucr.ac.cr.authentication.handlers.queries.UserQuery;
 import ucr.ac.cr.authentication.jpa.entities.UserEntity;
@@ -60,6 +59,7 @@ public class RecoverPasswordHandlerImpl implements RecoverPasswordHandler {
         try {
             PasswordRecoveryMessage msg = new PasswordRecoveryMessage(email, token);
             String jsonMsg = objectMapper.writeValueAsString(msg);
+
             kafkaTemplate.send("password-recovery", jsonMsg);
             return new Result.Success();
         } catch (Exception e) {
@@ -86,7 +86,8 @@ public class RecoverPasswordHandlerImpl implements RecoverPasswordHandler {
         UserRecoveryTokenEntity entity = new UserRecoveryTokenEntity();
         entity.setUser(user);
         entity.setToken(token);
-        entity.setExpiresAt(LocalDateTime.now().plusHours(1));
+        entity.setCreatedAt(LocalDateTime.now().withNano(0));
+        entity.setExpiresAt(LocalDateTime.now().plusHours(1).withNano(0));
         return entity;
     }
 }

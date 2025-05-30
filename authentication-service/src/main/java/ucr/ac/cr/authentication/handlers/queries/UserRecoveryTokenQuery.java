@@ -8,5 +8,6 @@ import java.util.UUID;
 public interface UserRecoveryTokenQuery {
     void save(UserRecoveryTokenEntity token);
 
-    Optional<UserRecoveryTokenEntity> findByToken(UUID token);
+    Optional<UserRecoveryTokenEntity> findByToken(String token);
+
 }

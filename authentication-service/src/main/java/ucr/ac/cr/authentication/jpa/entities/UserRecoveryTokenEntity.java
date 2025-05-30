@@ -1,5 +1,6 @@
 package ucr.ac.cr.authentication.jpa.entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -24,18 +25,15 @@ public class UserRecoveryTokenEntity {
     private String token;
 
     @Column(name = "created_at", nullable = false)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
 
     @Column(name = "expires_at", nullable = false)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime expiresAt;
 
     @Column(name = "used", nullable = false)
     private boolean used = false;
-
-    public UserRecoveryTokenEntity() {
-        this.tokenId = UUID.randomUUID();
-        this.createdAt = LocalDateTime.now();
-    }
 
     // Getters y Setters
 
