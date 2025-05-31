@@ -1,0 +1,19 @@
+server:
+  port: 8083
+
+spring:
+  datasource:
+    url: jdbc:postgresql://auth-db:5432/authdb
+    driver-class-name: org.postgresql.Driver
+    username: authuser
+    password: authpass
+    hikari:
+      maximum-pool-size: 10
+
+eureka:
+  client:
+    registerWithEureka: true
+    serviceUrl:
+      defaultZone: http://eureka:8761/eureka/
+  instance:
+    preferIpAddress: true
