@@ -13,55 +13,66 @@ import ucr.ac.cr.authentication.handlers.commands.ResetPasswordHandler;
 @RequestMapping("/api/public/auth")
 public class RecoverPasswordController {
 
-    @Autowired
-    private RecoverPasswordHandler handler;
+    private final RecoverPasswordHandler recoverHandler;
+    private final ResetPasswordHandler resetHandler;
+
+    public RecoverPasswordController(RecoverPasswordHandler recoverHandler, ResetPasswordHandler resetHandler) {
+        this.recoverHandler = recoverHandler;
+        this.resetHandler = resetHandler;
+    }
 
     @PostMapping("/recover-password")
-    public ResponseEntity<?> recover(@RequestBody RecoverPasswordRequest request) {
+    public ResponseEntity<?> recoverPassword(@RequestBody RecoverPasswordRequest request) {
         var command = new RecoverPasswordHandler.Command(request.email());
 
-        return handleResult(handler.handle(command));
+        return handleResultRecoverPassword(recoverHandler.handle(command));
     }
 
 
-    /*
+
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
         var command = new ResetPasswordHandler.Command(request.token(), request.newPassword());
-        return handleResultResetPassword(handler.handleResetPassword(command));
+        return handleResultResetPassword(resetHandler.handle(command));
     }
-    */
 
-    private ResponseEntity<?> handleResult(RecoverPasswordHandler.Result result) {
+
+    private ResponseEntity<?> handleResultRecoverPassword(RecoverPasswordHandler.Result result) {
         return switch (result) {
             case RecoverPasswordHandler.Result.Success success ->
                     ResponseEntity.ok("Email enviado correctamente.");
+
             case RecoverPasswordHandler.Result.InvalidEmail invalid ->
                     ResponseEntity.badRequest().body(invalid);
+
             case RecoverPasswordHandler.Result.UserNotFound notFound ->
                     ResponseEntity.status(404).body(notFound);
+
+            case RecoverPasswordHandler.Result.AlreadyRequested alreadyRequested ->
+                    ResponseEntity.status(404).body(alreadyRequested);
+
             case RecoverPasswordHandler.Result.EmailServiceError error ->
                     ResponseEntity.status(500).body(error);
         };
     }
 
-    /*
+
     private ResponseEntity<?> handleResultResetPassword(ResetPasswordHandler.Result result) {
-        // Manejar el resultado del reset password
         return switch (result) {
             case ResetPasswordHandler.Result.Success success ->
                     ResponseEntity.ok("Contraseña actualizada correctamente.");
+
             case ResetPasswordHandler.Result.InvalidToken invalidToken ->
-                    ResponseEntity.status(400).body(invalidToken);
-            case ResetPasswordHandler.Result.TokenExpired tokenExpired ->
-                    ResponseEntity.status(400).body(tokenExpired);
+                    ResponseEntity.status(400).body(invalidToken.message());
+
             case ResetPasswordHandler.Result.UserNotFound userNotFound ->
-                    ResponseEntity.status(404).body(userNotFound);
-            case ResetPasswordHandler.Result.PasswordInvalid passwordInvalid ->
-                    ResponseEntity.status(400).body(passwordInvalid);
-            default ->
-                    ResponseEntity.status(500).body("Error interno.");
+                    ResponseEntity.status(404).body(userNotFound.message());
+
+            case ResetPasswordHandler.Result.InvalidPassword passwordInvalid ->
+                    ResponseEntity.status(400).body(passwordInvalid.message());
+
+            case ResetPasswordHandler.Result.DatabaseError resetError ->
+                    ResponseEntity.status(500).body(resetError.message());
         };
     }
-    */
 }

@@ -8,14 +8,14 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "recovery_tokens")
-public class UserRecoveryTokenEntity {
+@Table(name = "password_reset_tokens")
+public class PasswordResetTokenEntity {
 
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     @Column(name = "token_id", columnDefinition = "UUID", nullable = false, updatable = false)
-    private UUID tokenId;
+    private UUID resetTokenId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -38,11 +38,11 @@ public class UserRecoveryTokenEntity {
     // Getters y Setters
 
     public UUID getTokenId() {
-        return tokenId;
+        return resetTokenId;
     }
 
     public void setTokenId(UUID tokenId) {
-        this.tokenId = tokenId;
+        this.resetTokenId = tokenId;
     }
 
     public UserEntity getUser() {

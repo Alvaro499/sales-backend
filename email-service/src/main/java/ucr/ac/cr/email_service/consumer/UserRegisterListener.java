@@ -24,12 +24,10 @@ public class UserRegisterListener {
             PasswordRecoveryMessage msg = mapper.readValue(jsonPayload, PasswordRecoveryMessage.class);
 
             String subject = "Recuperación de contraseña";
-            String url = "https://miapp.com/recovery-password?token=" + msg.token();
+            String url = "http://localhost:5173/reset-password/" + msg.token();
             String text = "Haz clic en el siguiente enlace para recuperar tu contraseña:\n" + url;
             emailService.sendSimpleEmail(msg.email(), subject, text);
 
-
-            emailService.sendSimpleEmail(msg.email(), subject, text);
         } catch (Exception e) {
             System.err.println("Error procesando mensaje Kafka: " + e.getMessage());
         }

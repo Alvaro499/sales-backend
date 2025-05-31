@@ -6,9 +6,10 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import ucr.ac.cr.authentication.handlers.commands.RecoverPasswordHandler;
 import ucr.ac.cr.authentication.handlers.queries.UserQuery;
+import ucr.ac.cr.authentication.handlers.queries.impl.PasswordResetTokenQueryImpl;
+import ucr.ac.cr.authentication.jpa.entities.PasswordResetTokenEntity;
 import ucr.ac.cr.authentication.jpa.entities.UserEntity;
-import ucr.ac.cr.authentication.jpa.entities.UserRecoveryTokenEntity;
-import ucr.ac.cr.authentication.jpa.repositories.UserRecoveryTokenRepository;
+import ucr.ac.cr.authentication.jpa.repositories.PasswordResetTokenRepository;
 import ucr.ac.cr.authentication.models.PasswordRecoveryMessage;
 
 import java.time.LocalDateTime;
@@ -19,19 +20,20 @@ import java.util.UUID;
 public class RecoverPasswordHandlerImpl implements RecoverPasswordHandler {
 
     private final UserQuery userQuery;
-    private final UserRecoveryTokenRepository userRecoveryTokenRepository;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final PasswordResetTokenQueryImpl passwordResetTokenQuery;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
     @Autowired
     public RecoverPasswordHandlerImpl(
-            UserQuery userQuery,
-            UserRecoveryTokenRepository userRecoveryTokenRepository,
+            UserQuery userQuery, PasswordResetTokenRepository passwordResetTokenRepository, PasswordResetTokenQueryImpl passwordResetTokenQuery,
             KafkaTemplate<String, String> kafkaTemplate,
             ObjectMapper objectMapper
     ) {
         this.userQuery = userQuery;
-        this.userRecoveryTokenRepository = userRecoveryTokenRepository;
+        this.passwordResetTokenRepository = passwordResetTokenRepository;
+        this.passwordResetTokenQuery = passwordResetTokenQuery;
         this.kafkaTemplate = kafkaTemplate;
         this.objectMapper = objectMapper;
     }
@@ -41,7 +43,7 @@ public class RecoverPasswordHandlerImpl implements RecoverPasswordHandler {
         String email = command.email();
 
         Result emailValidation = validateEmail(email);
-        if (emailValidation != null) return emailValidation;
+        if (!(emailValidation instanceof Result.Success)) return emailValidation;
 
         Optional<UserEntity> userOpt = userQuery.findByEmail(email);
         if (userOpt.isEmpty()) {
@@ -49,45 +51,62 @@ public class RecoverPasswordHandlerImpl implements RecoverPasswordHandler {
         }
 
         UserEntity user = userOpt.get();
-        String token = generateToken();
 
-        UserRecoveryTokenEntity recoveryToken = createRecoveryToken(user, token);
-        userRecoveryTokenRepository.save(recoveryToken);
-
-        //Se usa try-catch porque se debe capturar un posible error del servicio de email
-        // y de la busqueda del usuario, ya que no tenemos por el momento un GlobalException o algo
-        try {
-            PasswordRecoveryMessage msg = new PasswordRecoveryMessage(email, token);
-            String jsonMsg = objectMapper.writeValueAsString(msg);
-
-            kafkaTemplate.send("password-recovery", jsonMsg);
-            return new Result.Success();
-        } catch (Exception e) {
-            System.err.println("Error al enviar evento Kafka: " + e.getMessage());
-            return new Result.EmailServiceError("Error al procesar la recuperación.");
+        if (hasValidRecoveryToken(user)) {
+            return new Result.AlreadyRequested("Ya existe una solicitud activa de recuperación.");
         }
+
+        String token = generateToken();
+        PasswordResetTokenEntity recoveryToken = createRecoveryToken(user, token);
+        passwordResetTokenRepository.save(recoveryToken);
+        boolean kafkaSuccess = sendKafkaMessage(email, token);
+
+        if (!kafkaSuccess) {
+            return new Result.EmailServiceError("Error al enviar el correo de recuperación.");
+        }
+
+        return new Result.Success();
     }
 
     private Result validateEmail(String email) {
         if (email == null || email.isBlank()) {
             return new Result.InvalidEmail("El correo no puede estar vacío.");
         }
-        if (!email.contains("@")) {
-            return new Result.InvalidEmail("El formato del correo es inválido.");
+
+        if (!email.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
+            return new Result.InvalidEmail("El correo no tiene un formato válido.");
         }
-        return null;
+
+        return new Result.Success();
     }
 
     private String generateToken() {
         return UUID.randomUUID().toString();
     }
 
-    private UserRecoveryTokenEntity createRecoveryToken(UserEntity user, String token) {
-        UserRecoveryTokenEntity entity = new UserRecoveryTokenEntity();
+    private PasswordResetTokenEntity createRecoveryToken(UserEntity user, String token) {
+        PasswordResetTokenEntity entity = new PasswordResetTokenEntity();
         entity.setUser(user);
         entity.setToken(token);
         entity.setCreatedAt(LocalDateTime.now().withNano(0));
         entity.setExpiresAt(LocalDateTime.now().plusHours(1).withNano(0));
         return entity;
     }
+
+    private boolean hasValidRecoveryToken(UserEntity user) {
+        return passwordResetTokenQuery.findValidByUser(user).isPresent();
+    }
+
+    private boolean sendKafkaMessage(String email, String token) {
+        try {
+            PasswordRecoveryMessage msg = new PasswordRecoveryMessage(email, token);
+            String jsonMsg = objectMapper.writeValueAsString(msg);
+            kafkaTemplate.send("password-recovery", jsonMsg);
+            return true;
+        } catch (Exception e) {
+            System.err.println("Error al enviar correo de recuperación: " + e.getMessage());
+            return false;
+        }
+    }
+
 }

@@ -7,16 +7,16 @@ public interface ResetPasswordHandler {
     record Command(String token, String newPassword) {}
 
     sealed interface Result
-            permits Result.Success, Result.InvalidToken, Result.PasswordValidationError, Result.UserNotFound, Result.ResetError {
+            permits Result.Success, Result.InvalidToken, Result.InvalidPassword, Result.UserNotFound, Result.DatabaseError {
 
         record Success() implements Result {}
 
         record InvalidToken(String message) implements Result {}
 
-        record PasswordValidationError(String message) implements Result {}
+        record InvalidPassword(String message) implements Result {}
 
         record UserNotFound(String message) implements Result {}
 
-        record ResetError(String message) implements Result {}
+        record DatabaseError(String message) implements Result {}
     }
 }
