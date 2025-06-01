@@ -1,6 +1,8 @@
 package ucr.ac.cr.BackendVentas.jpa.entities;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -23,6 +25,7 @@ public class ProductEntity {
     @Column(name = "product_id", columnDefinition = "UUID", updatable = false, nullable = false)
     private UUID id;
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "pyme_id", referencedColumnName = "pyme_id", nullable = false)
     private PymeEntity pyme;
@@ -55,6 +58,7 @@ public class ProductEntity {
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
 
+    @JsonManagedReference
     @ManyToMany
     @JoinTable(
         name = "product_categories",

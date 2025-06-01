@@ -1,5 +1,6 @@
 package ucr.ac.cr.BackendVentas.jpa.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 import java.util.ArrayList; 
@@ -20,6 +21,7 @@ public class CategoryEntity {
     @Column(name = "description", columnDefinition = "TEXT", nullable = false)
     private String description;
 
+    @JsonBackReference
     @ManyToMany(mappedBy = "categories")
     private List<ProductEntity> products = new ArrayList<>();
 

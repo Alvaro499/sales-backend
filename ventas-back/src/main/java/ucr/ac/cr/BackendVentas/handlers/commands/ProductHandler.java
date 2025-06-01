@@ -10,12 +10,12 @@ public interface ProductHandler {
 
     Result handle(Command command);
 
-    sealed interface Result permits Result.Success, Result.InvalidFields, Result.PymeNotFound, Result.NotFoundProduct {
-        record Success(ProductEntity product) implements Result {}
-        record InvalidFields(String... fields) implements Result {}
-        record PymeNotFound() implements Result {}
-        record NotFoundProduct() implements Result {}  // New result for product not found
-    }
+    Result listProductsByPyme(UUID pymeId);
+
+    Result unpublishProduct(ProductHandler.UnpublishProductCommand command);
+
+    Result changeAvailabilityAndStock(ProductHandler.ChangeAvailabilityAndStockCommand command);
+
 
     // Command for creating a product
     record Command(String name, String description, BigDecimal price, List<String> category, List<String> images,
@@ -29,4 +29,18 @@ public interface ProductHandler {
 
     // Command for changing availability and stock of a product
     record ChangeAvailabilityAndStockCommand(UUID productId, Boolean available, Integer stock) {}
+
+    // Command to list products by pymeId
+    record ListProductsByPymeCommand(UUID pymeId) {}
+
+
+    sealed interface Result permits Result.Success, Result.InvalidFields, Result.PymeNotFound, Result.NotFoundProduct, Result.SuccessList {
+        record Success(ProductEntity product) implements Result {}
+        record SuccessList(List<ProductEntity> products) implements Result {}
+        record InvalidFields(String... fields) implements Result {}
+        record PymeNotFound() implements Result {}
+        record NotFoundProduct() implements Result {}  // New result for product not found
+    }
+
+
 }
