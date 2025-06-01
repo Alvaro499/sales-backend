@@ -8,6 +8,8 @@ import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp; 
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.query.Order;
+import ucr.ac.cr.BackendVentas.api.types.enums.OrderStatus;
 
 
 @Entity
@@ -34,8 +36,9 @@ public class OrderEntity {
     @Column(name = "total_amount", nullable = false)
     private BigDecimal totalAmount;
 
-    @Column(name = "status",length = 20, nullable = false)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", length = 20, nullable = false)
+    private OrderStatus status;
 
     @ManyToOne
     @JoinColumn(name = "payment_method_id", referencedColumnName = "payment_method_id", nullable = false)
@@ -47,4 +50,77 @@ public class OrderEntity {
 
     @Column(name = "shipping_address", length = 255, nullable = false)
     private String shippingAddress;
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public UUID getUser() {
+        return user;
+    }
+
+    public void setUser(UUID user) {
+        this.user = user;
+    }
+
+    public PymeEntity getPyme() {
+        return pyme;
+    }
+
+    public void setPyme(PymeEntity pyme) {
+        this.pyme = pyme;
+    }
+
+    public LocalDateTime getOrderDate() {
+        return orderDate;
+    }
+
+    public void setOrderDate(LocalDateTime orderDate) {
+        this.orderDate = orderDate;
+    }
+
+    public BigDecimal getTotalAmount() {
+        return totalAmount;
+    }
+
+    public void setTotalAmount(BigDecimal totalAmount) {
+        this.totalAmount = totalAmount;
+    }
+
+    public OrderStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(OrderStatus status) {
+        this.status = status;
+    }
+
+    public PaymentMethodEntity getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(PaymentMethodEntity paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public ShippingMethodEntity getShippingMethod() {
+        return shippingMethod;
+    }
+
+    public void setShippingMethod(ShippingMethodEntity shippingMethod) {
+        this.shippingMethod = shippingMethod;
+    }
+
+    public String getShippingAddress() {
+        return shippingAddress;
+    }
+
+    public void setShippingAddress(String shippingAddress) {
+        this.shippingAddress = shippingAddress;
+    }
+
 }

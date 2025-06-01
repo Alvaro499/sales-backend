@@ -2,46 +2,72 @@ package ucr.ac.cr.BackendVentas.handlers.commands.Impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
+import ucr.ac.cr.BackendVentas.api.types.enums.OrderStatus;
 import ucr.ac.cr.BackendVentas.handlers.commands.CreateOrderHandler;
-import ucr.ac.cr.BackendVentas.handlers.queries.PaymentMethodQuery;
-import ucr.ac.cr.BackendVentas.handlers.queries.ProductQuery;
-import ucr.ac.cr.BackendVentas.handlers.queries.ShippingMethodQuery;
-import ucr.ac.cr.BackendVentas.jpa.entities.ProductEntity;
-import ucr.ac.cr.BackendVentas.jpa.entities.PymeEntity;
+import ucr.ac.cr.BackendVentas.handlers.commands.OrderLineHandler;
+import ucr.ac.cr.BackendVentas.handlers.queries.*;
+import ucr.ac.cr.BackendVentas.jpa.entities.*;
 import ucr.ac.cr.BackendVentas.models.OrderProduct;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 @Service
 public class CreateOrderHandlerImpl implements CreateOrderHandler {
 
-    private final ProductQuery productQuery;
     private final PaymentMethodQuery paymentMethodQuery;
     private final ShippingMethodQuery shippingMethodQuery;
+    private final OrderQuery orderQuery;
+    private final OrderLineHandler orderLineHandler;
+    private final PymeQuery pymeQuery;
+    private final ProductQuery productQuery;
 
     @Autowired
     public CreateOrderHandlerImpl(
             ProductQuery productQuery,
             PaymentMethodQuery paymentMethodQuery,
-            ShippingMethodQuery shippingMethodQuery
+            ShippingMethodQuery shippingMethodQuery,
+            OrderQuery orderQuery,
+            PymeQuery pymeQuery,
+            OrderLineHandlerImpl orderLineHandler
     ) {
         this.productQuery = productQuery;
         this.paymentMethodQuery = paymentMethodQuery;
         this.shippingMethodQuery = shippingMethodQuery;
+        this.orderQuery = orderQuery;
+        this.pymeQuery = pymeQuery;
+        this.orderLineHandler = orderLineHandler;
     }
 
+    @Transactional
     @Override
     public Result handle(Command command) {
-
-        //Como el carrito trae productos de varias pymes, los separamos y agrupamos por pymes
-        //Map ===>>> [clave] = pyme ; [valor] = lista de productos
         Map<PymeEntity, List<OrderProduct>> productsByPyme;
+
         try {
             productsByPyme = groupProductsByPyme(command.products());
         } catch (NoSuchElementException e) {
-            return new Result.InvalidFields("Problemas con Lista de Productos",new String[]{"products"});
+            return new Result.InvalidFields("Problemas con Lista de Productos: " + e, new String[]{"products"});
         }
 
+        Result validationResult = validateAll(command, productsByPyme);
+        if (validationResult != null) return validationResult;
+
+        //try-catch para manejar el rollback entre Orders y OrderLines
+        try {
+            List<OrderEntity> orders = createOrders(command, productsByPyme);
+            return new Result.Success(orders.stream().map(OrderEntity::getId).toList());
+        } catch (Exception e) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+
+            return new Result.InvalidFields("Error creando órdenes: " + e.getMessage());
+        }
+    }
+
+
+    private Result validateAll(Command command, Map<PymeEntity, List<OrderProduct>> productsByPyme) {
         Result emailValidation = validateEmail(command.email());
         if (emailValidation != null) return emailValidation;
 
@@ -63,14 +89,44 @@ public class CreateOrderHandlerImpl implements CreateOrderHandler {
         Result shippingMethodValidation = validateShippingMethod(command.shippingMethod());
         if (shippingMethodValidation != null) return shippingMethodValidation;
 
+        Result pymesValidation = validatePymes(productsByPyme.keySet());
+        if (pymesValidation != null) return pymesValidation;
+
         Result productValidation = validateProducts(productsByPyme);
         if (productValidation != null) return productValidation;
 
         Result stockValidation = validateStock(productsByPyme);
-        if (stockValidation != null) return stockValidation;
+        return stockValidation;
+    }
 
-        UUID orderId = UUID.randomUUID();
-        return new Result.Success(orderId);
+    public List<OrderEntity> createOrders(Command command, Map<PymeEntity, List<OrderProduct>> productsByPyme) {
+        List<OrderEntity> orders = new ArrayList<>();
+
+        Optional<PaymentMethodEntity> paymentMethodEntity = paymentMethodQuery.findByName(command.paymentMethod());
+        Optional<ShippingMethodEntity> shippingMethodEntity = shippingMethodQuery.findByName(command.shippingMethod());
+
+        for (Map.Entry<PymeEntity, List<OrderProduct>> entry : productsByPyme.entrySet()) {
+            PymeEntity pyme = entry.getKey();
+            List<OrderProduct> products = entry.getValue();
+
+            OrderEntity newOrder = new OrderEntity();
+            newOrder.setUser(command.userId());
+            newOrder.setPyme(pyme);
+            newOrder.setStatus(OrderStatus.PENDIENTE);
+            newOrder.setShippingAddress(command.shippingAddress());
+            newOrder.setPaymentMethod(paymentMethodEntity.get()); //ya se validó el método de pago en ValidateAll()
+            newOrder.setShippingMethod(shippingMethodEntity.get()); //ya se validó el método de entrega en ValidateAll()
+            newOrder.setTotalAmount(calculateTotalAmount(products));
+
+            // Guardar la orden
+            Optional<OrderEntity> savedOrder = orderQuery.save(newOrder);
+
+            // Crear líneas de orden
+            orderLineHandler.createOrderLines(savedOrder.get(), products);
+
+            orders.add(newOrder);
+        }
+        return orders;
     }
 
     //Agrupar productos por PYME
@@ -84,6 +140,23 @@ public class CreateOrderHandlerImpl implements CreateOrderHandler {
             groupedProductsByPyme.computeIfAbsent(productEntity.getPyme(), k -> new ArrayList<>()).add(product);
         }
         return groupedProductsByPyme;
+    }
+
+    //Recibe únicamente la lista de products de la PYME indicada dentro del for dentro del metodo createOrders
+    private BigDecimal calculateTotalAmount(List<OrderProduct> orderProducts) {
+        BigDecimal total = BigDecimal.ZERO;
+
+        for (OrderProduct orderProduct : orderProducts) {
+            UUID productId = orderProduct.productId();
+            int quantity = orderProduct.quantity();
+
+            ProductEntity product = productQuery.findById(productId).get();
+            BigDecimal price = product.getPrice();
+
+            BigDecimal subtotal = price.multiply(BigDecimal.valueOf(quantity));
+            total = total.add(subtotal);
+        }
+        return total;
     }
 
     private Result validateEmail(String email) {
@@ -166,7 +239,7 @@ public class CreateOrderHandlerImpl implements CreateOrderHandler {
 
         boolean existsAndActive = shippingMethodQuery.existsByNameIgnoreCaseAndIsActiveTrue(method);
         if (!existsAndActive) {
-            return new Result.InvalidFields("El método de pago no es válido o no está activo","shippingMethod");
+            return new Result.InvalidFields("El método de envío no es válido o no está activo","shippingMethod");
         }
         return null;
     }
@@ -231,29 +304,23 @@ public class CreateOrderHandlerImpl implements CreateOrderHandler {
         return null;
     }
 
+    private Result validatePymes(Set<PymeEntity> pymes) {
+        for (PymeEntity pyme : pymes) {
 
-    //Considerar si manejar ERROR_CODE para los Result
-    //¿Un método para verificar pymes, usuarios??
+            if (pyme == null) {
+                return new Result.InvalidFields("Una de las pymes asociadas es nula", "pymes");
+            }
 
-    //Falta la logica de Crear los Orders y OrderLines (siguiente spring)
+            Optional<PymeEntity> foundPyme = pymeQuery.findById(pyme.getId());
+            if (foundPyme.isEmpty()) {
+                return new Result.InvalidFields("La pyme con ID " + pyme.getId() + " no existe en la base de datos", "pymes");
+            }
 
-    private boolean validatePyme(List<OrderProduct> products) {
-        if (products == null || products.isEmpty()) return false;
-
-        for (OrderProduct p : products) {
-            if (p.productId() == null || p.quantity() <= 0) return false;
-
-            // Validar que el producto exista y esté activo/disponible
-            Optional<ProductEntity> product = productQuery.findById(p.productId());
-            if (product.isEmpty()) return false;
-
-            ProductEntity pEntity = product.get();
-            if (!pEntity.isActive() || !pEntity.getAvailable()) return false;
+            if (!foundPyme.get().getActive()) {
+                return new Result.InvalidFields("La pyme " + foundPyme.get().getName() + " está inactiva", "pymes");
+            }
         }
-
-        return true;
+        return null;
     }
 
-
 }
-
