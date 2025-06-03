@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   eureka:
-    image: itsChaco26/eureka:latest
+    image: itschaco26/eureka:latest
     ports:
       - "8761:8761"
     environment:
@@ -11,7 +11,7 @@ services:
       - backend
 
   gateway:
-    image: itsChaco26/gateway:latest
+    image: itschaco26/gateway:latest
     ports:
       - "8000:8080"
     environment:
@@ -22,7 +22,7 @@ services:
       - backend
 
   authentication-service:
-    image: itsChaco26/authentication-service:latest
+    image: itschaco26/authentication-service:latest
     ports:
       - "8001:8083"
     environment:
@@ -34,7 +34,7 @@ services:
       - backend
 
   email-service:
-    image: itsChaco26/email-service:latest
+    image: itschaco26/email-service:latest
     ports:
       - "8002:8084"
     environment:
@@ -46,7 +46,7 @@ services:
       - backend
 
   ventas-back:
-    image: itsChaco26/ventas-back:latest
+    image: itschaco26/ventas-back:latest
     ports:
       - "8004:8082"
     environment:
@@ -59,7 +59,7 @@ services:
       - backend
 
   recommendation-service:
-    image: itsChaco26/recommendation-service:latest
+    image: itschaco26/recommendation-service:latest
     ports:
       - "8003:8000"
     environment:
