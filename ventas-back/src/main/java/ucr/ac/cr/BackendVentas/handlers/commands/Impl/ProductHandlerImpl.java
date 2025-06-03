@@ -1,11 +1,13 @@
 package ucr.ac.cr.BackendVentas.handlers.commands.Impl;
 
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ucr.ac.cr.BackendVentas.handlers.commands.ProductHandler;
 import ucr.ac.cr.BackendVentas.jpa.entities.CategoryEntity;
 import ucr.ac.cr.BackendVentas.jpa.entities.ProductEntity;
 import ucr.ac.cr.BackendVentas.jpa.entities.PymeEntity;
+import ucr.ac.cr.BackendVentas.jpa.repositories.CategoryRepository;
 import ucr.ac.cr.BackendVentas.jpa.repositories.ProductRepository;
 import ucr.ac.cr.BackendVentas.jpa.repositories.PymeRepository;
 
@@ -17,11 +19,13 @@ public class ProductHandlerImpl implements ProductHandler {
 
     private final ProductRepository productRepository;
     private final PymeRepository pymeRepository;
+    private final CategoryRepository categoryRepository;
 
     @Autowired
-    public ProductHandlerImpl(ProductRepository productRepository, PymeRepository pymeRepository) {
+    public ProductHandlerImpl(ProductRepository productRepository, PymeRepository pymeRepository, CategoryRepository categoryRepository) {
         this.productRepository = productRepository;
         this.pymeRepository = pymeRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     @Override
@@ -141,4 +145,42 @@ public class ProductHandlerImpl implements ProductHandler {
         }
         return null;
     }
+
+    @Override
+    public Result searchProducts(String term, Integer categoryId, BigDecimal priceMin, BigDecimal priceMax) {
+        List<ProductEntity> filteredProducts = productRepository.findAll((root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (term != null && !term.isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("name")), "%" + term.toLowerCase() + "%"));
+            }
+
+            if (categoryId != null) {
+                predicates.add(cb.isMember(
+                        categoryRepository.getById(categoryId),
+                        root.get("categories")
+                ));
+            }
+
+            if (priceMin != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("price"), priceMin));
+            }
+
+            if (priceMax != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("price"), priceMax));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        });
+
+        if (filteredProducts.isEmpty()) {
+            return new Result.NotFoundProduct();
+        }
+
+        return new Result.SuccessList(filteredProducts);
+    }
+
+
+
+
 }

@@ -16,6 +16,7 @@ public interface ProductHandler {
 
     Result changeAvailabilityAndStock(ProductHandler.ChangeAvailabilityAndStockCommand command);
 
+    Result searchProducts(String term, Integer categoryId, BigDecimal priceMin, BigDecimal priceMax);
 
     // Command for creating a product
     record Command(String name, String description, BigDecimal price, List<String> category, List<String> images,

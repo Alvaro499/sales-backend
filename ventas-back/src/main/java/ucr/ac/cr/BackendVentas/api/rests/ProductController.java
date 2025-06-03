@@ -8,6 +8,7 @@ import ucr.ac.cr.BackendVentas.models.ErrorCode;
 import ucr.ac.cr.BackendVentas.api.types.ProductRequest;
 import ucr.ac.cr.BackendVentas.api.types.Response;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -130,6 +131,24 @@ public class ProductController {
             throw new IllegalStateException("Unexpected result: " + result);
         }
     }
+
+
+    @GetMapping("/search")
+    public Response searchProducts(
+            @RequestParam(required = false) String term,
+            @RequestParam(required = false) Integer categoryId,
+            @RequestParam(required = false) BigDecimal priceMin,
+            @RequestParam(required = false) BigDecimal priceMax
+    ) {
+        var result = productHandler.searchProducts(term, categoryId, priceMin, priceMax);
+
+        if (result instanceof ProductHandler.Result.SuccessList successList) {
+            return new Response("Products retrieved", successList.products());
+        } else {
+            return new Response("No products found", List.of());
+        }
+    }
+
 
 
 
