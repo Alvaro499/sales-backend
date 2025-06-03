@@ -7,6 +7,8 @@ services:
       - "8761:8761"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+    networks:
+      - backend
 
   gateway:
     build: ./gateway
@@ -16,6 +18,8 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
       - eureka
+    networks:
+      - backend
 
   authentication-service:
     build: ./authentication-service
@@ -26,6 +30,8 @@ services:
     depends_on:
       - auth-db
       - eureka
+    networks:
+      - backend
 
   email-service:
     build: ./email-service
@@ -36,6 +42,8 @@ services:
     depends_on:
       - kafka
       - eureka
+    networks:
+      - backend
 
   ventas-back:
     build: ./ventas-back
@@ -47,12 +55,15 @@ services:
       - ventas-db
       - kafka
       - eureka
+    networks:
+      - backend
 
   recommendation-service:
     build: ./recommendation-service
     ports:
       - "8003:8000"
     environment:
+      - SPRING_PROFILES_ACTIVE=docker
       - DB_HOST=recommendation-db
       - DB_PORT=5432
       - DB_USER=recouser
@@ -60,6 +71,9 @@ services:
       - DB_NAME=recodb
     depends_on:
       - recommendation-db
+      - eureka
+    networks:
+      - backend
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
@@ -68,6 +82,8 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - "2181:2181"
+    networks:
+      - backend
 
   kafka:
     image: confluentinc/cp-kafka:7.5.0
@@ -77,9 +93,12 @@ services:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     depends_on:
       - zookeeper
+    networks:
+      - backend
 
   auth-db:
     image: postgres:15
@@ -89,6 +108,8 @@ services:
       POSTGRES_DB: authdb
     ports:
       - "5433:5432"
+    networks:
+      - backend
 
   ventas-db:
     image: postgres:15
@@ -98,6 +119,8 @@ services:
       POSTGRES_DB: ventasdb
     ports:
       - "5435:5432"
+    networks:
+      - backend
 
   recommendation-db:
     image: postgres:15
@@ -107,3 +130,9 @@ services:
       POSTGRES_DB: recodb
     ports:
       - "5434:5432"
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
