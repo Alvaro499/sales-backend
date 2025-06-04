@@ -5,8 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import ucr.ac.cr.authentication.handlers.commands.ConfirmationCodeHandler;
+import ucr.ac.cr.authentication.handlers.queries.ConfirmationCodeQuery;
 import ucr.ac.cr.authentication.jpa.entities.ConfirmationCodeEntity;
-import ucr.ac.cr.authentication.jpa.repositories.ConfirmationCodeRepository;
 import ucr.ac.cr.authentication.models.ConfirmationCodeMessage;
 import ucr.ac.cr.BackendVentas.jpa.entities.PymeEntity;
 import ucr.ac.cr.BackendVentas.jpa.repositories.PymeRepository;
@@ -19,19 +19,19 @@ import java.util.Random;
 public class ConfirmationCodeHandlerImpl implements ConfirmationCodeHandler {
 
     private final PymeRepository pymeRepository;
-    private final ConfirmationCodeRepository codeRepository;
+    private final ConfirmationCodeQuery codeQuery;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
     @Autowired
     public ConfirmationCodeHandlerImpl(
             PymeRepository pymeRepository,
-            ConfirmationCodeRepository codeRepository,
+            ConfirmationCodeQuery codeQuery,
             KafkaTemplate<String, String> kafkaTemplate,
             ObjectMapper objectMapper
     ) {
         this.pymeRepository = pymeRepository;
-        this.codeRepository = codeRepository;
+        this.codeQuery = codeQuery;
         this.kafkaTemplate = kafkaTemplate;
         this.objectMapper = objectMapper;
     }
@@ -49,21 +49,17 @@ public class ConfirmationCodeHandlerImpl implements ConfirmationCodeHandler {
             return new Result.InvalidEmail("El formato del correo no es válido.");
         }
 
-        if (!pymeRepository.existsByEmail(email)) {
-            return new Result.PymeNotFound("No se encontró ninguna pyme con ese correo.");
-        }
-
         PymeEntity pyme = pymeRepository.findAll().stream()
                 .filter(p -> p.getEmail().equalsIgnoreCase(email))
                 .findFirst()
                 .orElse(null);
 
         if (pyme == null) {
-            return new Result.PymeNotFound("Error: la pyme no se pudo recuperar.");
+            return new Result.PymeNotFound("No se encontró ninguna pyme con ese correo.");
         }
 
         if (inputCode != null && !inputCode.isBlank()) {
-            Optional<ConfirmationCodeEntity> opt = codeRepository.findByCode(inputCode);
+            Optional<ConfirmationCodeEntity> opt = codeQuery.findByCode(inputCode);
             if (opt.isEmpty() || !opt.get().getPyme().equals(pyme)) {
                 return new Result.InvalidCode("Código inválido.");
             }
@@ -79,17 +75,14 @@ public class ConfirmationCodeHandlerImpl implements ConfirmationCodeHandler {
 
             codeEntity.setUsed(true);
             pyme.setActive(true);
-            codeRepository.save(codeEntity);
+            codeQuery.save(codeEntity);
             pymeRepository.save(pyme);
 
             return new Result.Verified();
         }
 
-        boolean exists = codeRepository
-                .findFirstByPymeAndUsedFalseAndExpiresAtAfter(pyme, LocalDateTime.now())
-                .isPresent();
-        if (exists) {
-            return new Result.AlreadyRequested("Se ha solicitado un código recientemente.");
+        if (codeQuery.findValidByPyme(pyme).isPresent()) {
+            return new Result.AlreadyRequested("Ya se ha solicitado un código recientemente.");
         }
 
         String code = String.format("%06d", new Random().nextInt(999999));
@@ -99,7 +92,8 @@ public class ConfirmationCodeHandlerImpl implements ConfirmationCodeHandler {
         entity.setCreatedAt(LocalDateTime.now());
         entity.setExpiresAt(LocalDateTime.now().plusMinutes(15));
         entity.setUsed(false);
-        codeRepository.save(entity);
+
+        codeQuery.save(entity);
 
         try {
             ConfirmationCodeMessage msg = new ConfirmationCodeMessage(email, code);
