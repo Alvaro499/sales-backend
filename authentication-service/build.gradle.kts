@@ -19,6 +19,7 @@ repositories {
 extra["springCloudVersion"] = "2024.0.0"
 
 dependencies {
+    implementation("org.postgresql:postgresql:42.5.1")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
     implementation("org.springframework.cloud:spring-cloud-starter-feign:1.4.7.RELEASE")
@@ -28,7 +29,6 @@ dependencies {
     implementation("io.jsonwebtoken:jjwt:0.12.5")
     implementation("javax.xml.bind:jaxb-api:2.3.0")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-
 }
 
 dependencyManagement {
