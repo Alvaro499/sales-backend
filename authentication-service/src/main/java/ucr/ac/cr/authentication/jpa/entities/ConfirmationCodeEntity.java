@@ -5,7 +5,6 @@ import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
-import ucr.ac.cr.BackendVentas.jpa.entities.PymeEntity;
 
 @Entity
 @Table(name = "pyme_confirmation_codes")
@@ -16,8 +15,8 @@ public class ConfirmationCodeEntity {
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private PymeEntity pyme;
+    @Column(name = "pyme_id", nullable = false)
+    private UUID pymeId;
 
     @Column(nullable = false)
     private String code;
@@ -39,12 +38,12 @@ public class ConfirmationCodeEntity {
         this.id = id;
     }
 
-    public PymeEntity getPyme() {
-        return pyme;
+    public UUID getPymeId() {
+        return pymeId;
     }
 
-    public void setPyme(PymeEntity pyme) {
-        this.pyme = pyme;
+    public void setPymeId(UUID pymeId) {
+        this.pymeId = pymeId;
     }
 
     public String getCode() {
@@ -78,5 +77,4 @@ public class ConfirmationCodeEntity {
     public void setUsed(boolean used) {
         this.used = used;
     }
-
 }

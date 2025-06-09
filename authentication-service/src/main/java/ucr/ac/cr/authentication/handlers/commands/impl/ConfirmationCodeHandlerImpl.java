@@ -1,39 +1,38 @@
 package ucr.ac.cr.authentication.handlers.commands.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import ucr.ac.cr.authentication.client.basic.PymeClient;
 import ucr.ac.cr.authentication.handlers.commands.ConfirmationCodeHandler;
 import ucr.ac.cr.authentication.handlers.queries.ConfirmationCodeQuery;
 import ucr.ac.cr.authentication.jpa.entities.ConfirmationCodeEntity;
 import ucr.ac.cr.authentication.models.ConfirmationCodeMessage;
-import ucr.ac.cr.BackendVentas.jpa.entities.PymeEntity;
-import ucr.ac.cr.BackendVentas.jpa.repositories.PymeRepository;
+import ucr.ac.cr.authentication.models.PymeResponse;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Random;
+import java.util.UUID;
 
 @Service
 public class ConfirmationCodeHandlerImpl implements ConfirmationCodeHandler {
 
-    private final PymeRepository pymeRepository;
     private final ConfirmationCodeQuery codeQuery;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
+    private final PymeClient pymeClient;
 
-    @Autowired
     public ConfirmationCodeHandlerImpl(
-            PymeRepository pymeRepository,
             ConfirmationCodeQuery codeQuery,
             KafkaTemplate<String, String> kafkaTemplate,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            PymeClient pymeClient
     ) {
-        this.pymeRepository = pymeRepository;
         this.codeQuery = codeQuery;
         this.kafkaTemplate = kafkaTemplate;
         this.objectMapper = objectMapper;
+        this.pymeClient = pymeClient;
     }
 
     @Override
@@ -49,18 +48,14 @@ public class ConfirmationCodeHandlerImpl implements ConfirmationCodeHandler {
             return new Result.InvalidEmail("El formato del correo no es válido.");
         }
 
-        PymeEntity pyme = pymeRepository.findAll().stream()
-                .filter(p -> p.getEmail().equalsIgnoreCase(email))
-                .findFirst()
-                .orElse(null);
-
-        if (pyme == null) {
+        UUID pymeId = extractPymeIdFromEmail(email);
+        if (pymeId == null) {
             return new Result.PymeNotFound("No se encontró ninguna pyme con ese correo.");
         }
 
         if (inputCode != null && !inputCode.isBlank()) {
             Optional<ConfirmationCodeEntity> opt = codeQuery.findByCode(inputCode);
-            if (opt.isEmpty() || !opt.get().getPyme().equals(pyme)) {
+            if (opt.isEmpty() || !opt.get().getPymeId().equals(pymeId)) {
                 return new Result.InvalidCode("Código inválido.");
             }
 
@@ -74,20 +69,24 @@ public class ConfirmationCodeHandlerImpl implements ConfirmationCodeHandler {
             }
 
             codeEntity.setUsed(true);
-            pyme.setActive(true);
             codeQuery.save(codeEntity);
-            pymeRepository.save(pyme);
+
+            try {
+                pymeClient.activatePyme(pymeId);
+            } catch (Exception e) {
+                return new Result.EmailServiceError("Código verificado, pero no se pudo activar la pyme.");
+            }
 
             return new Result.Verified();
         }
 
-        if (codeQuery.findValidByPyme(pyme).isPresent()) {
+        if (codeQuery.findValidByPymeId(pymeId).isPresent()) {
             return new Result.AlreadyRequested("Ya se ha solicitado un código recientemente.");
         }
 
-        String code = String.format("%06d", new Random().nextInt(999999));
+        String code = String.format("%04d", new Random().nextInt(10000));
         ConfirmationCodeEntity entity = new ConfirmationCodeEntity();
-        entity.setPyme(pyme);
+        entity.setPymeId(pymeId);
         entity.setCode(code);
         entity.setCreatedAt(LocalDateTime.now());
         entity.setExpiresAt(LocalDateTime.now().plusMinutes(15));
@@ -104,4 +103,15 @@ public class ConfirmationCodeHandlerImpl implements ConfirmationCodeHandler {
             return new Result.EmailServiceError("No se pudo enviar el correo con el código.");
         }
     }
+
+    private UUID extractPymeIdFromEmail(String email) {
+        try {
+            PymeResponse response = pymeClient.getByEmail(email);
+            return response.id();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+
 }
