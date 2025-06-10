@@ -72,6 +72,7 @@ public class OrderValidator {
     public void validateProducts(Map<PymeEntity, List<OrderProduct>> productsByPyme) {
         for (List<OrderProduct> productList : productsByPyme.values()) {
             for (OrderProduct orderedProduct : productList) {
+
                 if (orderedProduct.productId() == null) {
                     throw validationError("El ID del producto es obligatorio", ErrorCode.REQUIRED_FIELDS, "products");
                 }
@@ -91,8 +92,11 @@ public class OrderValidator {
     }
 
     public void validateStock(Map<PymeEntity, List<OrderProduct>> productsByPyme) {
+
         for (List<OrderProduct> productList : productsByPyme.values()) {
+
             for (OrderProduct orderedProduct : productList) {
+
                 Optional<ProductEntity> foundProduct = productQuery.findById(orderedProduct.productId());
                 if (foundProduct.isEmpty()) {
                     throw validationError("Producto no encontrado: " + orderedProduct.productId(), ErrorCode.ENTITY_NOT_FOUND, "products");
@@ -102,7 +106,7 @@ public class OrderValidator {
                     throw validationError(
                             "El producto '" + product.getName() + "' no tiene suficiente stock. Pedido: " +
                                     orderedProduct.quantity() + ", Disponible: " + product.getStock(),
-                            ErrorCode.INVALID_FORMAT,
+                            ErrorCode.OUT_OF_STOCK,
                             "products"
                     );
                 }

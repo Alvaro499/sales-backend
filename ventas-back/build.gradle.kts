@@ -25,9 +25,14 @@ dependencies {
 	implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
 	implementation("org.springframework.kafka:spring-kafka")
 	implementation("org.postgresql:postgresql:42.6.0")
-	runtimeOnly("com.h2database:h2")
+	testRuntimeOnly("com.h2database:h2")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+	//Para testing
+	testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
+	testImplementation("org.mockito:mockito-core:5.11.0")
+	testImplementation("org.mockito:mockito-junit-jupiter:5.11.0")
 }
 
 dependencyManagement {
@@ -36,6 +41,12 @@ dependencyManagement {
 	}
 }
 
+//Para mostrar los logs de las pruebas
 tasks.withType<Test> {
 	useJUnitPlatform()
+
+	testLogging {
+		events("passed", "skipped", "failed")
+		showStandardStreams = true
+	}
 }

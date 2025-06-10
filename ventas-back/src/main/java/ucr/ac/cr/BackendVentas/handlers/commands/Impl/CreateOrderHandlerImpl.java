@@ -10,12 +10,15 @@ import ucr.ac.cr.BackendVentas.handlers.queries.PaymentMethodQuery;
 import ucr.ac.cr.BackendVentas.handlers.queries.ProductQuery;
 import ucr.ac.cr.BackendVentas.handlers.queries.ShippingMethodQuery;
 import ucr.ac.cr.BackendVentas.jpa.entities.*;
+import ucr.ac.cr.BackendVentas.models.ErrorCode;
 import ucr.ac.cr.BackendVentas.models.OrderProduct;
 import ucr.ac.cr.BackendVentas.handlers.validators.OrderValidator;
 import ucr.ac.cr.BackendVentas.utils.ValidationUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
+
+import static ucr.ac.cr.BackendVentas.utils.ValidationUtils.validationError;
 
 @Service
 public class CreateOrderHandlerImpl implements CreateOrderHandler {
@@ -55,22 +58,6 @@ public class CreateOrderHandlerImpl implements CreateOrderHandler {
         return new Result.Success(orders.stream().map(OrderEntity::getId).toList());
     }
 
-    /** Revisarlo
-     * Este método mapea una BaseException a un Result específico.
-     * lo que permite seguir usando los Result para mantener los switch
-     * en el controlador y no en el manejador de excepciones global.
-
-    private Result mapBaseExceptionToResult(BaseException ex) {
-        return switch (ErrorCode.valueOf(ex.getCode())) {
-            case REQUIRED_FIELDS, INVALID_FORMAT ->
-                    new Result.InvalidField(ex.getMessage(), ex.getParams().isEmpty() ? null : ex.getParams().get(0));
-            case ENTITY_NOT_FOUND -> new Result.NotFound(ex.getMessage());
-            case CONFLICT -> new Result.OutOfStock(ex.getMessage());
-            case UNAUTHORIZED -> new Result.InvalidField(ex.getMessage(), "unauthorized");
-        };
-    }
-    */
-
     private void validateAll(Command command, Map<PymeEntity, List<OrderProduct>> productsByPyme) {
         ValidationUtils.validateEmail(command.email());
         ValidationUtils.validateName("firstName", command.firstName());
@@ -101,7 +88,7 @@ public class CreateOrderHandlerImpl implements CreateOrderHandler {
             newOrder.setShippingAddress(command.shippingAddress());
             newOrder.setPaymentMethod(paymentMethod.get());
             newOrder.setShippingMethod(shippingMethod.get());
-            newOrder.setTotalAmount(calculateTotalAmount(products));
+            newOrder.setTotalAmount(calculateOrderTotalAmount(products));
 
             Optional<OrderEntity> savedOrder = orderQuery.save(newOrder);
             orderLineHandler.createOrderLines(savedOrder.get(), products);
@@ -112,7 +99,7 @@ public class CreateOrderHandlerImpl implements CreateOrderHandler {
         return orders;
     }
 
-    private BigDecimal calculateTotalAmount(List<OrderProduct> orderProducts) {
+    private BigDecimal calculateOrderTotalAmount(List<OrderProduct> orderProducts) {
         BigDecimal total = BigDecimal.ZERO;
 
         for (OrderProduct orderProduct : orderProducts) {
@@ -132,7 +119,17 @@ public class CreateOrderHandlerImpl implements CreateOrderHandler {
         Map<PymeEntity, List<OrderProduct>> grouped = new HashMap<>();
 
         for (OrderProduct product : products) {
-            ProductEntity productEntity = productQuery.findById(product.productId()).orElseThrow();
+
+            Optional<ProductEntity> optionalProduct = productQuery.findById(product.productId());
+            if (optionalProduct.isEmpty()) {
+                throw validationError(
+                        "Producto no encontrado: " + product.productId(),
+                        ErrorCode.ENTITY_NOT_FOUND,
+                        "products"
+                );
+            }
+
+            ProductEntity productEntity = optionalProduct.get();
             grouped.computeIfAbsent(productEntity.getPyme(), k -> new ArrayList<>()).add(product);
         }
 

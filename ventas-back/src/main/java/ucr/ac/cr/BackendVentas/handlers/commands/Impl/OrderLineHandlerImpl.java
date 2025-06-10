@@ -6,12 +6,16 @@ import ucr.ac.cr.BackendVentas.handlers.queries.OrderLineQuery;
 import ucr.ac.cr.BackendVentas.jpa.entities.OrderEntity;
 import ucr.ac.cr.BackendVentas.jpa.entities.OrderLineEntity;
 import ucr.ac.cr.BackendVentas.jpa.entities.ProductEntity;
-import ucr.ac.cr.BackendVentas.jpa.repositories.OrderLineRepository;
 import ucr.ac.cr.BackendVentas.jpa.repositories.ProductRepository;
+import ucr.ac.cr.BackendVentas.models.ErrorCode;
 import ucr.ac.cr.BackendVentas.models.OrderProduct;
+import ucr.ac.cr.BackendVentas.utils.MonetaryUtils;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
+
+import static ucr.ac.cr.BackendVentas.utils.ValidationUtils.validationError;
 
 @Service
 public class OrderLineHandlerImpl implements OrderLineHandler {
@@ -34,6 +38,12 @@ public class OrderLineHandlerImpl implements OrderLineHandler {
             ProductEntity productEntity = productRepository.findById(product.productId())
                     .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado"));
 
+
+            //BigDecimal unitPrice = applyPromotion(productEntity);
+            //BigDecimal subtotal = MonetaryUtils.round(
+                    //unitPrice.multiply(BigDecimal.valueOf(product.quantity()))
+            //);
+
             line.setProduct(productEntity);
             line.setQuantity(product.quantity());
             line.setUnitPrice(productEntity.getPrice());
@@ -43,4 +53,35 @@ public class OrderLineHandlerImpl implements OrderLineHandler {
             orderLineQuery.save(line);
         }
     }
+
+    /**
+     * La promoción se maneja entre valores de 0 y 1, donde 0 es sin descuento y 0.9
+     * es un descuento del 90%.
+     * La fórmula es: finalPrice = price × (1 - promotion)
+     * Si la promoción es 0.20 → discountFactor = 1 - 0.20 = 0.80
+     */
+
+    private BigDecimal applyPromotion(ProductEntity product) {
+        BigDecimal price = product.getPrice();
+        BigDecimal promotion = product.getPromotion();
+
+        if (promotion == null) promotion = BigDecimal.ZERO;
+
+        boolean isNegativePromotion = promotion.compareTo(BigDecimal.ZERO) < 0;
+        boolean isOverNinetyPercent = promotion.compareTo(new BigDecimal("0.90")) > 0;
+
+        if (isNegativePromotion || isOverNinetyPercent) {
+            throw validationError(
+                    "Promoción inválida para el producto: " + product.getId(),
+                    ErrorCode.INVALID_FORMAT,
+                    "promotion"
+            );
+        }
+        BigDecimal discountFactor = BigDecimal.ONE.subtract(promotion);
+        BigDecimal finalPrice = price.multiply(discountFactor);
+
+        //Redondeo seguro a 2 decimales
+        return MonetaryUtils.round(finalPrice);
+    }
+
 }

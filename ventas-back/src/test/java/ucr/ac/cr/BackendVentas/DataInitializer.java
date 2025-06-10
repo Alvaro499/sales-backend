@@ -1,19 +1,16 @@
 package ucr.ac.cr.BackendVentas;
 
+
 import jakarta.annotation.PostConstruct;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import ucr.ac.cr.BackendVentas.jpa.entities.*;
 import ucr.ac.cr.BackendVentas.jpa.repositories.*;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
-@Profile("!test")
-@Component
+@TestConfiguration
 public class DataInitializer {
 
     @Autowired private PymeRepository pymeRepo;
@@ -23,16 +20,7 @@ public class DataInitializer {
     @Autowired private ShippingMethodRepository shippingRepo;
 
     @PostConstruct
-    public void testInit() {
-        System.out.println("DataInitializer de PRODUCCIÓN ejecutado (esto NO debería verse en tests)");
-    }
-
-    @PostConstruct
     public void init() {
-        System.out.println("[PRODUCCIÓN] DataInitializer ejecutado.");
-        if (categoryRepo.count() > 0 && pymeRepo.count() > 0 && productRepo.count() > 0 && paymentRepo.count() > 0 && shippingRepo.count() > 0) {
-            return;
-        }
 
         //Se crean categorias
         CategoryEntity tech = new CategoryEntity();
@@ -49,36 +37,56 @@ public class DataInitializer {
 
         categoryRepo.saveAll(List.of(tech, food, decor));
 
-        // --- Crear Métodos de Pago ---
+        // Métodos de pago y envío
         paymentRepo.saveAll(List.of(
                 createPayment("EFECTIVO", "Pago en el punto de entrega", true),
                 createPayment("SINPE", "Pago por Sinpe Móvil", true),
                 createPayment("DEBITO", "Transferencia a cuenta IBAN", true)
         ));
 
-        // --- Crear Métodos de Envío ---
         shippingRepo.saveAll(List.of(
                 createShipping("ENTREGA_LOCAL", "Retiro en el local de la pyme", BigDecimal.ZERO, true),
                 createShipping("CORREOS_CR", "Entrega en 3 a 5 días hábiles", new BigDecimal("1500"), true),
                 createShipping("ENVIOS_EXPRESS", "Entrega rápida en 1 día", new BigDecimal("3000"), true)
         ));
 
-        // --- Crear Pymes ---
+        createDataForBasic(tech, food, decor);
+        createDataForRollback(tech, food, decor);
+    }
+
+    private void createDataForBasic(CategoryEntity tech, CategoryEntity food, CategoryEntity decor) {
         PymeEntity pyme1 = createPyme("Tech CR", "tech@example.com", "1234", "San José", "8888-1111", "Tienda de electrónicos", null);
         PymeEntity pyme2 = createPyme("Delicias Ticas", "food@example.com", "1234", "Cartago", "8888-2222", "Snacks artesanales", null);
         PymeEntity pyme3 = createPyme("Casa Bonita", "deco@example.com", "1234", "Alajuela", "8888-3333", "Decoración para el hogar", null);
 
         pymeRepo.saveAll(List.of(pyme1, pyme2, pyme3));
 
-        // --- Crear Productos ---
-        ProductEntity prod1 = createProduct("Audífonos Bluetooth", "Inalámbricos con cancelación de ruido", new BigDecimal("25000"), 10, tech, pyme1);
-        ProductEntity prod2 = createProduct("Galletas Artesanales", "Hechas con ingredientes naturales", new BigDecimal("3500"), 50, food, pyme2);
-        ProductEntity prod3 = createProduct("Lámpara de Sal", "Decorativa y relajante", new BigDecimal("12000"), 20, decor, pyme3);
-        ProductEntity prod4 = createProduct("Power Bank 10000mAh", "Batería externa compacta", new BigDecimal("18000"), 30, tech, pyme1);
-        ProductEntity prod5 = createProduct("Café Orgánico", "Café costarricense 100% puro", new BigDecimal("5500"), 40, food, pyme2);
-
-        productRepo.saveAll(List.of(prod1, prod2, prod3, prod4, prod5));
+        productRepo.saveAll(List.of(
+                createProduct("Audífonos Bluetooth", "Inalámbricos con cancelación de ruido", new BigDecimal("25000"), 10, tech, pyme1),
+                createProduct("Galletas Artesanales", "Hechas con ingredientes naturales", new BigDecimal("3500"), 50, food, pyme2),
+                createProduct("Lámpara de Sal", "Decorativa y relajante", new BigDecimal("12000"), 20, decor, pyme3),
+                createProduct("Power Bank 10000mAh", "Batería externa compacta", new BigDecimal("18000"), 30, tech, pyme1),
+                createProduct("Café Orgánico", "Café costarricense 100% puro", new BigDecimal("5500"), 40, food, pyme2)
+        ));
     }
+
+    private void createDataForRollback(CategoryEntity tech, CategoryEntity food, CategoryEntity decor) {
+        PymeEntity pymeRollback1 = createPyme("RollbackTech", "rollback-tech@example.com", "1234", "Heredia", "8888-4444", "Electrónica para pruebas", null);
+        PymeEntity pymeRollback2 = createPyme("RollbackFoods", "rollback-food@example.com", "1234", "Limón", "8888-5555", "Snacks para pruebas", null);
+        PymeEntity pymeRollback3 = createPyme("RollbackDeco", "rollback-deco@example.com", "1234", "Puntarenas", "8888-6666", "Decoración de prueba", null);
+
+        pymeRepo.saveAll(List.of(pymeRollback1, pymeRollback2, pymeRollback3));
+
+        productRepo.saveAll(List.of(
+                createProduct("Teclado Mecánico", "RGB con switches azules", new BigDecimal("35000"), 100, tech, pymeRollback1),
+                createProduct("Mouse Inalámbrico", "Con batería recargable", new BigDecimal("15000"), 80, tech, pymeRollback1),
+                createProduct("Caja de Chocolates", "Chocolates artesanales surtidos", new BigDecimal("8000"), 100, food, pymeRollback2),
+                createProduct("Mermelada de Mango", "Mermelada casera natural", new BigDecimal("4500"), 120, food, pymeRollback2),
+                createProduct("Florero de Cerámica", "Florero decorativo hecho a mano", new BigDecimal("11000"), 60, decor, pymeRollback3),
+                createProduct("Velas Aromáticas", "Set de velas con esencias", new BigDecimal("9500"), 70, decor, pymeRollback3)
+        ));
+    }
+
 
     // Métodos auxiliares
 
