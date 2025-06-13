@@ -94,12 +94,9 @@ public class ConfirmationCodeHandlerImpl implements ConfirmationCodeHandler {
 
         codeQuery.save(entity);
 
-        try {
-            ConfirmationCodeMessage msg = new ConfirmationCodeMessage(email, code);
-            String json = objectMapper.writeValueAsString(msg);
-            kafkaTemplate.send("confirmation-code", json);
+        if (sendKafkaMessage(email, code)) {
             return new Result.Success();
-        } catch (Exception e) {
+        } else {
             return new Result.EmailServiceError("No se pudo enviar el correo con el código.");
         }
     }
@@ -113,5 +110,15 @@ public class ConfirmationCodeHandlerImpl implements ConfirmationCodeHandler {
         }
     }
 
-
+    private boolean sendKafkaMessage(String email, String code) {
+        try {
+            ConfirmationCodeMessage msg = new ConfirmationCodeMessage(email, code);
+            String json = objectMapper.writeValueAsString(msg);
+            kafkaTemplate.send("confirmation-code", json);
+            return true;
+        } catch (Exception e) {
+            System.err.println("Error al enviar código de confirmación: " + e.getMessage());
+            return false;
+        }
+    }
 }

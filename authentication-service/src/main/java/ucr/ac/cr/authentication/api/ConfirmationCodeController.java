@@ -19,7 +19,8 @@ public class ConfirmationCodeController {
     @PostMapping("/send-confirmation-code")
     public ResponseEntity<?> sendCode(@RequestBody ConfirmationCodeRequest request) {
         var command = new ConfirmationCodeHandler.Command(request.email(), request.code());
-        return handleResult(handler.handle(command));
+        ConfirmationCodeHandler.Result result = handler.handle(command);
+        return handleResult(result);
     }
 
     private ResponseEntity<?> handleResult(ConfirmationCodeHandler.Result result) {

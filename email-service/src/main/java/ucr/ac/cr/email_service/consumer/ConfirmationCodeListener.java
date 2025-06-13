@@ -15,6 +15,7 @@ public class ConfirmationCodeListener {
 
     @KafkaListener(topics = "confirmation-code", groupId = "mail-service")
     public void consumeConfirmationCode(String jsonPayload) {
+
         try {
             ObjectMapper mapper = new ObjectMapper();
             ConfirmationCodeMessage msg = mapper.readValue(jsonPayload, ConfirmationCodeMessage.class);

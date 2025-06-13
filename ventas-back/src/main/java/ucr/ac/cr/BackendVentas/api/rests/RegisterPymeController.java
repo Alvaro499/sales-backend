@@ -3,12 +3,15 @@ package ucr.ac.cr.BackendVentas.api.rests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ucr.ac.cr.BackendVentas.api.types.PymeResponse;
 import ucr.ac.cr.BackendVentas.api.types.RegisterPymeRequest;
+import ucr.ac.cr.BackendVentas.jpa.repositories.PymeRepository;
 import ucr.ac.cr.BackendVentas.handlers.commands.RegisterPymeHandler;
 import ucr.ac.cr.BackendVentas.models.BaseException;
 import ucr.ac.cr.BackendVentas.models.ErrorCode;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/pymes")
@@ -16,6 +19,9 @@ public class RegisterPymeController {
 
     @Autowired
     private RegisterPymeHandler registerPymeHandler;
+
+    @Autowired
+    private PymeRepository pymeRepository;
 
     @PostMapping("/register")
     @CrossOrigin(origins = "http://localhost:5173")
@@ -57,4 +63,23 @@ public class RegisterPymeController {
             }
         };
     }
+
+    @PutMapping("/internal/activate")
+    public ResponseEntity<?> activate(@RequestParam UUID pymeId) {
+        return pymeRepository.findById(pymeId)
+                .map(pyme -> {
+                    pyme.setActive(true);
+                    pymeRepository.save(pyme);
+                    return ResponseEntity.ok().build();
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/internal/by-email")
+    public ResponseEntity<?> getByEmail(@RequestParam String email) {
+        return pymeRepository.findByEmail(email)
+                .map(pyme -> ResponseEntity.ok(new PymeResponse(pyme.getId(), pyme.getEmail())))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
 }
