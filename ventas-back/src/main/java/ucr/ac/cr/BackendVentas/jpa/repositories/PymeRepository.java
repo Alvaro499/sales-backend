@@ -13,4 +13,6 @@ public interface PymeRepository extends JpaRepository <PymeEntity, String> {
     boolean existsByName(String name);
 
     Optional<PymeEntity> findById(UUID uuid);
+
+    Optional<PymeEntity> findByEmail(String email);
 }
