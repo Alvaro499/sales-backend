@@ -25,7 +25,6 @@ public class RegisterPymeController {
                 request.email(),
                 request.phone(),
                 request.address(),
-                request.password(),
                 request.description()
         );
 

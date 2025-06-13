@@ -79,7 +79,6 @@ public class DataInitializer {
         PymeEntity p = new PymeEntity();
         p.setName(name);
         p.setEmail(email);
-        p.setPassword(password);
         p.setAddress(address);
         p.setPhone(phone);
         p.setDescription(desc);
