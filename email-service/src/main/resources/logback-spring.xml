@@ -18,12 +18,12 @@
         </encoder>
     </appender>
 
-    <!-- Solo errores de tu microservicio van al archivo -->
+    <!-- Solo errores del microservicio van al archivo -->
     <logger name="ucr.ac.cr.email_service" level="ERROR" additivity="false">
         <appender-ref ref="EMAIL_FILE"/>
     </logger>
 
-    <!-- Todo lo demás sigue saliendo en consola -->
+    <!-- Todos los demás tipos de LOGS sigue saliendo en consola -->
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
     </root>
