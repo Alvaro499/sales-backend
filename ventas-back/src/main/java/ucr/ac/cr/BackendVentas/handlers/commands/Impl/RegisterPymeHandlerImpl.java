@@ -42,7 +42,6 @@ public class RegisterPymeHandlerImpl implements RegisterPymeHandler {
         pyme.setEmail(command.email());
         pyme.setPhone(command.phone());
         pyme.setAddress(command.address());
-        pyme.setPassword(command.password()); //TODO: Hash a la contraseña
         pyme.setDescription(command.description());
 
         PymeEntity savedPyme = pymeRepository.save(pyme);
@@ -64,9 +63,7 @@ public class RegisterPymeHandlerImpl implements RegisterPymeHandler {
         if (command.address() == null || command.address().isEmpty()) {
             return new Result.InvalidFields("address");
         }
-        if (command.password() == null || command.password().isEmpty()) {
-            return new Result.InvalidFields("password");
-        }
+
         return null;
     }
 }
