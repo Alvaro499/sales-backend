@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Nuevo pedido recibido</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 40px 0;
+        }
+
+        .outer-banner {
+            background-color: #007bff;
+            padding: 30px 20px;
+        }
+
+        .container {
+            background-color: #ffffff;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        h2 {
+            color: #333333;
+        }
+
+        p {
+            color: #555555;
+            line-height: 1.6;
+        }
+
+        .info-box {
+            background-color: #f1f1f1;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .product-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .product-table th,
+        .product-table td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        .product-table th {
+            background-color: #f2f2f2;
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 0.85em;
+            color: #999999;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="outer-banner">
+    <div class="container">
+        <h2>¡Tienes un nuevo pedido!</h2>
+        <p>Hola <strong th:text="${pymeName}">[Nombre Pyme]</strong>, has recibido un nuevo pedido a través de la plataforma.</p>
+
+        <h3>Datos del cliente:</h3>
+        <div class="info-box">
+            <p><strong>Nombre:</strong> <span th:text="${firstName} + ' ' + ${lastName}">Juan Pérez</span></p>
+            <p><strong>Email:</strong> <span th:text="${email}">cliente@correo.com</span></p>
+            <p><strong>Teléfono:</strong> <span th:text="${phone}">8888-8888</span></p>
+            <p><strong>Dirección de envío:</strong> <span th:text="${shippingAddress}">San José, Costa Rica</span></p>
+        </div>
+
+        <h3>🛒 Productos solicitados:</h3>
+        <table class="product-table">
+            <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Precio Unitario</th>
+                <th>Subtotal</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="product : ${products}">
+                <td th:text="${product.name}">Teclado Mecánico</td>
+                <td th:text="${product.quantity}">1</td>
+                <td th:text="${product.unitPrice}">₡25,000</td>
+                <td th:text="${product.subtotal}">₡25,000</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <p><strong>Total del pedido:</strong> <span th:text="${orderTotal}">₡25,000</span></p>
+
+        <p>Por favor, procede con la preparación y envío según el método elegido por el cliente.</p>
+
+        <p>Gracias por ser parte de nuestra plataforma.</p>
+
+        <div class="footer">
+            © 2025 Plataforma de Ventas. Todos los derechos reservados.
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
+
+<!--
+
+Campo Thymeleaf / dinámico	Valor esperado
+${pymeName}	Nombre de la pyme que recibe el pedido
+${firstName} + ' ' + ${lastName}	Nombre completo del cliente
+${email}	Correo del cliente
+${phone}	Teléfono del cliente
+${shippingAddress}	Dirección de envío
+${products}	Lista de productos comprados a esa pyme
+${product.name}	Nombre del producto
+${product.quantity}	Cantidad solicitada
+${product.unitPrice}	Precio unitario
+${product.subtotal}	Subtotal por producto
+${orderTotal}	Total de la orden de esa pyme
+
+
+-->
