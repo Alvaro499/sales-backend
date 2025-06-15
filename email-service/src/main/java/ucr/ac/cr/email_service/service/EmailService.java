@@ -47,7 +47,7 @@ public class EmailService {
             Context context = new Context();
             context.setVariables(emailTemplate.getVariables());
 
-            String html = templateEngine.process(emailTemplate.getTemplateName(), context);
+            String html = templateEngine.process(emailTemplate.getTemplateName().getFilename(), context);
 
             helper.setText(html, true);
 
@@ -57,7 +57,7 @@ public class EmailService {
             EmailErrorLog errorLog = new EmailErrorLog(
                     emailTemplate.getTo(),
                     emailTemplate.getSubject(),
-                    emailTemplate.getTemplateName(),
+                    emailTemplate.getTemplateName().getFilename(),
                     emailTemplate.getVariables(),
                     e.getMessage()
             );

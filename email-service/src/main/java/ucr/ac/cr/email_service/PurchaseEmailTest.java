@@ -5,12 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import ucr.ac.cr.email_service.consumer.PurchaseSummaryListener;
-import ucr.ac.cr.email_service.models.PurchaseSummaryMessage;
+import ucr.ac.cr.email_service.events.PurchaseSummaryMessage;
 
 import java.util.List;
 
 @Component
-public class EmailTestRunner implements CommandLineRunner {
+public class PurchaseEmailTest implements CommandLineRunner {
 
     @Autowired
     private PurchaseSummaryListener listener;

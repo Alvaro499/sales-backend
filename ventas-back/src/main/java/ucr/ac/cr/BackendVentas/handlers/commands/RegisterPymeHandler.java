@@ -13,6 +13,6 @@ public interface RegisterPymeHandler {
         record NameAlreadyExist() implements Result {}
     }
 
-    record Command(String pymeName, String email, String phone, String address, String password, String description) {}
+    record Command(String pymeName, String email, String phone, String address, String description) {}
 
 }

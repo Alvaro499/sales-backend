@@ -10,12 +10,12 @@ import java.util.Map;
 public class EmailTemplate {
     private final String to;
     private final String subject;
-    private final String templateName;
+    private final EmailTemplateName templateName;
     private final Map<String, Object> variables;
     private final String imageId;
     private final String imagePath;
 
-    public EmailTemplate(String to, String subject, String templateName,
+    public EmailTemplate(String to, String subject, EmailTemplateName templateName,
                          Map<String, Object> variables, String imageId, String imagePath) {
         this.to = to;
         this.subject = subject;
@@ -27,7 +27,7 @@ public class EmailTemplate {
 
     public String getTo() { return to; }
     public String getSubject() { return subject; }
-    public String getTemplateName() { return templateName; }
+    public EmailTemplateName getTemplateName() { return templateName; }
     public Map<String, Object> getVariables() { return variables; }
     public String getImageId() { return imageId; }
     public String getImagePath() { return imagePath; }
