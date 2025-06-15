@@ -5,7 +5,6 @@ import ucr.ac.cr.BackendVentas.handlers.queries.PymeConfirmationCodeQuery;
 import ucr.ac.cr.BackendVentas.jpa.entities.PymeConfirmationCodeEntity;
 import ucr.ac.cr.BackendVentas.jpa.repositories.PymeConfirmationCodeRepository;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -26,5 +25,10 @@ public class PymeConfirmationCodeQueryImpl implements PymeConfirmationCodeQuery 
     @Override
     public PymeConfirmationCodeEntity save(PymeConfirmationCodeEntity entity) {
         return repository.save(entity);
+    }
+
+    @Override
+    public Optional<PymeConfirmationCodeEntity> findLatestByPymeId(UUID pymeId) {
+        return repository.findTopByPymeIdOrderByCreatedAtDesc(pymeId);
     }
 }

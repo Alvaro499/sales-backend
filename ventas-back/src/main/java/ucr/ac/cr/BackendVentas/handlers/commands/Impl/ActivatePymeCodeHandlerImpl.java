@@ -54,7 +54,7 @@ public class ActivatePymeCodeHandlerImpl implements ActivatePymeCodeHandler {
     }
 
     private Optional<PymeConfirmationCodeEntity> findConfirmationCode(UUID pymeId) {
-        return codeQuery.findValidByPymeId(pymeId);
+        return codeQuery.findLatestByPymeId(pymeId);
     }
 
     private Result processCodeValidation(PymeConfirmationCodeEntity codeEntity, PymeEntity pyme, String inputCode) {

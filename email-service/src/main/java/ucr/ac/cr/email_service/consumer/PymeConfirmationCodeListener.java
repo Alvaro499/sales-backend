@@ -29,7 +29,8 @@ public class PymeConfirmationCodeListener {
 
             Map<String, Object> emailVariables = Map.of(
                     "email", msg.email(),
-                    "confirmationCode", msg.code()
+                    "confirmationCode", msg.code(),
+                    "pymeName", msg.pymeName()
             );
 
             EmailTemplate emailTemplate = new EmailTemplate(

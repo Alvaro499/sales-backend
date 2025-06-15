@@ -10,4 +10,6 @@ import java.util.UUID;
 @Repository
 public interface PymeConfirmationCodeRepository extends JpaRepository<PymeConfirmationCodeEntity, UUID> {
     Optional<PymeConfirmationCodeEntity> findFirstByPymeIdAndUsedFalse(UUID pymeId);
+    Optional<PymeConfirmationCodeEntity> findTopByPymeIdOrderByCreatedAtDesc(UUID pymeId);
+
 }

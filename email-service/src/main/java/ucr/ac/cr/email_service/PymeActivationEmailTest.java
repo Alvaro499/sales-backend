@@ -7,6 +7,14 @@ import org.springframework.stereotype.Component;
 import ucr.ac.cr.email_service.consumer.PymeConfirmationCodeListener;
 import ucr.ac.cr.email_service.events.PymeRegisteredEvent;
 
+
+/* * Este componente se utiliza para probar el envío de correos electrónicos de activación de pymes.
+ *
+ * Correo: ventas.pymes5.pruebas@gmail.com
+ * Contraseña: 12345678Q#
+ *
+ *  */
+
 @Component
 public class PymeActivationEmailTest implements CommandLineRunner {
 
@@ -18,8 +26,9 @@ public class PymeActivationEmailTest implements CommandLineRunner {
         try {
             // Crear un evento de prueba
             PymeRegisteredEvent event = new PymeRegisteredEvent(
-                    "alvarosiles499@gmail.com",
-                    "1234"
+                    "ventas.pymes5.pruebas@gmail.com",
+                    "1234",
+                    "Mi Pyme de Prueba"
             );
 
             // Convertir a JSON

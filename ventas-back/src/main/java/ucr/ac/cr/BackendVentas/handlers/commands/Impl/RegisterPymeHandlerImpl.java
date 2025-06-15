@@ -41,16 +41,18 @@ public class RegisterPymeHandlerImpl implements RegisterPymeHandler {
 
         var pyme = new PymeEntity();
         pyme.setName(command.pymeName());
+        pyme.setUserId(command.userId());
         pyme.setEmail(command.email());
         pyme.setPhone(command.phone());
         pyme.setAddress(command.address());
         pyme.setDescription(command.description());
+        pyme.setActive(false);
 
         PymeEntity savedPyme = pymeRepository.save(pyme);
 
         String confirmationCode = createPymeCodeHandler.handle(savedPyme);
 
-        PymeRegisteredEvent event = new PymeRegisteredEvent(savedPyme.getEmail(), confirmationCode);
+        PymeRegisteredEvent event = new PymeRegisteredEvent(savedPyme.getEmail(), confirmationCode, savedPyme.getName());
 
         // Enviar el evento a Kafka
         boolean enviado = pymeRegisteredProducer.sendEmailConfirmation(event);

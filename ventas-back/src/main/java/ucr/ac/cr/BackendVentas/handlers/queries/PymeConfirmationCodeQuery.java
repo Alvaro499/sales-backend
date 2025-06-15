@@ -9,4 +9,6 @@ public interface PymeConfirmationCodeQuery {
 
     Optional<PymeConfirmationCodeEntity> findValidByPymeId(UUID pymeId);
     PymeConfirmationCodeEntity save(PymeConfirmationCodeEntity entity);
+
+    Optional<PymeConfirmationCodeEntity> findLatestByPymeId(UUID pymeId);
 }

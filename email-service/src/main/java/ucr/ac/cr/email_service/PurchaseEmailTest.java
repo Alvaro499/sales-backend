@@ -18,6 +18,8 @@ public class PurchaseEmailTest implements CommandLineRunner {
     @Override
     public void run(String... args) {
 
+        System.out.println("Running PurchaseEmailTest...");
+        /*
         try {
             List<PurchaseSummaryMessage.Product> products = List.of(
                     new PurchaseSummaryMessage.Product("Café Premium", 2, "3500", "7000"),
@@ -34,6 +36,7 @@ public class PurchaseEmailTest implements CommandLineRunner {
         } catch (Exception e) {
             e.printStackTrace();
         }
+         */
     }
 
     private static PurchaseSummaryMessage getPurchaseSummaryMessage(List<PurchaseSummaryMessage.Product> products) {
@@ -42,7 +45,7 @@ public class PurchaseEmailTest implements CommandLineRunner {
         );
 
         return new PurchaseSummaryMessage(
-                "alvarosiles499@gmail.com",
+                "ventas.pymes5.pruebas@gmail.com",
                 "María",
                 "Rodríguez",
                 "8888-8888",

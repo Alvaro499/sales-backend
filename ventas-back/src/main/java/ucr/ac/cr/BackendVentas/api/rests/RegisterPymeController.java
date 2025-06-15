@@ -26,6 +26,7 @@ public class RegisterPymeController {
     @CrossOrigin(origins = "http://localhost:5173")
     public ResponseEntity<?> registerPyme(@RequestBody RegisterPymeRequest request) {
         var command = new RegisterPymeHandler.Command(
+                request.userId(),
                 request.pymeName(),
                 request.email(),
                 request.phone(),
