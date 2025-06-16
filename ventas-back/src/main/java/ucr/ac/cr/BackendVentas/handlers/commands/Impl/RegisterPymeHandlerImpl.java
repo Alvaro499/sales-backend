@@ -76,6 +76,7 @@ public class RegisterPymeHandlerImpl implements RegisterPymeHandler {
         if (command.address() == null || command.address().isEmpty()) {
             return new Result.InvalidFields("address");
         }
+
         return null;
     }
 }
