@@ -7,7 +7,6 @@ import ucr.ac.cr.BackendVentas.jpa.entities.*;
 import ucr.ac.cr.BackendVentas.jpa.repositories.*;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -84,6 +83,7 @@ public class DataInitializer {
         p.setDescription(desc);
         p.setLogoUrl(logoUrl);
         p.setActive(true);
+        p.setUserId(UUID.randomUUID());
         return p;
     }
 

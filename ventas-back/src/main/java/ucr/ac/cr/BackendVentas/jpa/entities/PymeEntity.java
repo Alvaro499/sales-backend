@@ -19,6 +19,9 @@ public class PymeEntity {
     @Column(name = "pyme_id", columnDefinition = "UUID", updatable = false, nullable = false)
     private UUID id;
 
+    @Column(name = "user_id", columnDefinition = "UUID", nullable = false)
+    private UUID userId;
+
     @Column(name = "name", length = 255, unique = true, nullable = false)
     private String name;
 
@@ -51,6 +54,9 @@ public class PymeEntity {
     public void setId(UUID id) {
         this.id = id;
     }
+
+    public UUID getUserId() { return userId; }
+    public void setUserId(UUID userId) { this.userId = userId; }
 
     public String getName() {
         return name;

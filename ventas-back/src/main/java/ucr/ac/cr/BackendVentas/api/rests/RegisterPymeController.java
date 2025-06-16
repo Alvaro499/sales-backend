@@ -11,7 +11,6 @@ import ucr.ac.cr.BackendVentas.models.BaseException;
 import ucr.ac.cr.BackendVentas.models.ErrorCode;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/pymes")
@@ -27,6 +26,7 @@ public class RegisterPymeController {
     @CrossOrigin(origins = "http://localhost:5173")
     public ResponseEntity<?> registerPyme(@RequestBody RegisterPymeRequest request) {
         var command = new RegisterPymeHandler.Command(
+                request.userId(),
                 request.pymeName(),
                 request.email(),
                 request.phone(),
@@ -63,22 +63,22 @@ public class RegisterPymeController {
         };
     }
 
-    @PutMapping("/internal/activate")
-    public ResponseEntity<?> activate(@RequestParam UUID pymeId) {
-        return pymeRepository.findById(pymeId)
-                .map(pyme -> {
-                    pyme.setActive(true);
-                    pymeRepository.save(pyme);
-                    return ResponseEntity.ok().build();
-                })
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @GetMapping("/internal/by-email")
-    public ResponseEntity<?> getByEmail(@RequestParam String email) {
-        return pymeRepository.findByEmail(email)
-                .map(pyme -> ResponseEntity.ok(new PymeResponse(pyme.getId(), pyme.getEmail())))
-                .orElse(ResponseEntity.notFound().build());
-    }
+//    @PutMapping("/internal/activate")
+//    public ResponseEntity<?> activate(@RequestParam UUID pymeId) {
+//        return pymeRepository.findById(pymeId)
+//                .map(pyme -> {
+//                    pyme.setActive(true);
+//                    pymeRepository.save(pyme);
+//                    return ResponseEntity.ok().build();
+//                })
+//                .orElse(ResponseEntity.notFound().build());
+//    }
+//
+//    @GetMapping("/internal/by-email")
+//    public ResponseEntity<?> getByEmail(@RequestParam String email) {
+//        return pymeRepository.findByEmail(email)
+//                .map(pyme -> ResponseEntity.ok(new PymeResponse(pyme.getId(), pyme.getEmail())))
+//                .orElse(ResponseEntity.notFound().build());
+//    }
 
 }

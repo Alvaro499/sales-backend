@@ -1,4 +1,4 @@
-package ucr.ac.cr.authentication.jpa.entities;
+package ucr.ac.cr.BackendVentas.jpa.entities;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.GenericGenerator;
@@ -8,24 +8,22 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "pyme_confirmation_codes")
-public class ConfirmationCodeEntity {
+public class PymeConfirmationCodeEntity {
 
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private UUID id;
 
-    @Column(name = "pyme_id", nullable = false)
-    private UUID pymeId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "pyme_id", nullable = false, unique = true)
+    private PymeEntity pyme;
 
     @Column(nullable = false)
     private String code;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
-
-    @Column(nullable = false)
-    private LocalDateTime expiresAt;
 
     @Column(nullable = false)
     private boolean used = false;
@@ -38,13 +36,9 @@ public class ConfirmationCodeEntity {
         this.id = id;
     }
 
-    public UUID getPymeId() {
-        return pymeId;
-    }
+    public PymeEntity getPyme() {return pyme;}
 
-    public void setPymeId(UUID pymeId) {
-        this.pymeId = pymeId;
-    }
+    public void setPyme(PymeEntity pyme) {this.pyme = pyme;}
 
     public String getCode() {
         return code;
@@ -60,14 +54,6 @@ public class ConfirmationCodeEntity {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getExpiresAt() {
-        return expiresAt;
-    }
-
-    public void setExpiresAt(LocalDateTime expiresAt) {
-        this.expiresAt = expiresAt;
     }
 
     public boolean isUsed() {

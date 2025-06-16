@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <title>Verificación de cuenta Pyme</title>
+  <style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 40px 0;
+    }
+
+    .outer-banner {
+        background-color: #007bff;
+        padding: 30px 20px;
+    }
+
+    .container {
+        background-color: #ffffff;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        text-align: center;
+    }
+
+    h2 {
+        color: #333333;
+    }
+
+    p {
+        color: #555555;
+        line-height: 1.6;
+    }
+
+    .code-box {
+        display: inline-block;
+        margin: 20px 0;
+        padding: 15px 25px;
+        font-size: 28px;
+        font-weight: bold;
+        letter-spacing: 10px;
+        background-color: #f1f1f1;
+        border-radius: 8px;
+        color: #007bff;
+    }
+
+    .footer {
+        margin-top: 30px;
+        font-size: 0.85em;
+        color: #999999;
+    }
+  </style>
+</head>
+<body>
+
+<div class="outer-banner">
+  <div class="container">
+    <h2>Verifica tu cuenta Pyme</h2>
+    <p>Hola <strong th:text="${pymeName}">Casa Bonita</strong>, para activar tu cuenta hemos generado un código de verificación.</p>
+
+    <p>Ingresa el siguiente código en la plataforma para completar tu registro:</p>
+
+    <div class="code-box" th:text="${confirmationCode}">1234</div>
+
+    <p>Este código tiene una validez limitada. Si no solicitaste este registro, puedes ignorar este mensaje.</p>
+
+    <p>Gracias por confiar en nosotros.</p>
+
+    <div class="footer">
+      © 2025 Plataforma de Ventas. Todos los derechos reservados.
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

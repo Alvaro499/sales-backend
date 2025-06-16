@@ -6,4 +6,6 @@ public class ErrorCode {
     public static final String IDENTIFICATION_NUMBER_ALREADY_EXIST = "IDENTIFICATION_NUMBER_ALREADY_EXIST";
     public static final String NOT_FOUND = "NOT_FOUND";
     public static final String PRODUCT_NOT_FOUND = "PRODUCT_NOT_FOUND";
+    public static final String ALREADY_VERIFIED = "ALREADY_VERIFIED";
+    public static final String INVALID_CONFIRMATION_CODE = "INVALID_CONFIRMATION_CODE";
 }

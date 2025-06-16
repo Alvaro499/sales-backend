@@ -1,52 +1,65 @@
 package ucr.ac.cr.BackendVentas.handlers.commands.Impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+import ucr.ac.cr.BackendVentas.events.PymeRegisteredEvent;
+import ucr.ac.cr.BackendVentas.handlers.commands.CreatePymeConfirmationCodeHandler;
 import ucr.ac.cr.BackendVentas.jpa.repositories.PymeRepository;
-import ucr.ac.cr.BackendVentas.service.EmailService;
+import ucr.ac.cr.BackendVentas.producers.PymeRegisteredProducer;
 import ucr.ac.cr.BackendVentas.jpa.entities.PymeEntity;
 import org.springframework.stereotype.Component;
 import ucr.ac.cr.BackendVentas.handlers.commands.RegisterPymeHandler;
 
-
-
 @Component
 public class RegisterPymeHandlerImpl implements RegisterPymeHandler {
     private final PymeRepository pymeRepository;
-    private final EmailService emailService;
+    private final PymeRegisteredProducer pymeRegisteredProducer;
+    private final CreatePymeConfirmationCodeHandler createPymeCodeHandler;
 
     @Autowired
-    public RegisterPymeHandlerImpl(PymeRepository pymeRepository, EmailService emailService) {
+    public RegisterPymeHandlerImpl(PymeRepository pymeRepository,
+                                   PymeRegisteredProducer pymeRegisteredProducer,
+                                   CreatePymeConfirmationCodeHandler createPymeCodeHandler) {
         this.pymeRepository = pymeRepository;
-        this.emailService = emailService;
+        this.pymeRegisteredProducer = pymeRegisteredProducer;
+        this.createPymeCodeHandler = createPymeCodeHandler;
     }
 
+    @Transactional
     @Override
     public Result handle(Command command) {
         var invalidFields = validateFields(command);
-        if (invalidFields != null) {
-            return invalidFields;
-        }
+        if (invalidFields != null) return invalidFields;
 
-        boolean emailExist = pymeRepository.existsByEmail(command.email());
-        if (emailExist) {
+        if (pymeRepository.existsByEmail(command.email())) {
             return new Result.EmailAlreadyExist();
         }
-        boolean nameExist = pymeRepository.existsByName(command.pymeName());
-        if (nameExist) {
+
+        if (pymeRepository.existsByName(command.pymeName())) {
             return new Result.NameAlreadyExist();
         }
 
-
-        PymeEntity pyme = new PymeEntity();
+        var pyme = new PymeEntity();
         pyme.setName(command.pymeName());
+        pyme.setUserId(command.userId());
         pyme.setEmail(command.email());
         pyme.setPhone(command.phone());
         pyme.setAddress(command.address());
         pyme.setDescription(command.description());
+        pyme.setActive(false);
 
         PymeEntity savedPyme = pymeRepository.save(pyme);
 
-        emailService.sendEmailEvent(savedPyme.getEmail());
+        String confirmationCode = createPymeCodeHandler.handle(savedPyme);
+
+        PymeRegisteredEvent event = new PymeRegisteredEvent(savedPyme.getEmail(), confirmationCode, savedPyme.getName());
+
+        // Enviar el evento a Kafka
+        boolean enviado = pymeRegisteredProducer.sendEmailConfirmation(event);
+        if (!enviado) {
+            return new Result.InvalidFields("Error al enviar el correo de confirmación.");
+        }
+
         return new Result.Success(savedPyme.getId());
     }
 

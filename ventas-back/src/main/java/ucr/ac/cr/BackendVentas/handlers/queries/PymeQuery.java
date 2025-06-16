@@ -8,5 +8,5 @@ import java.util.UUID;
 public interface PymeQuery {
 
     Optional<PymeEntity> findById(UUID uuid);
-
+    Optional<PymeEntity> findByUserId(UUID userId);
 }

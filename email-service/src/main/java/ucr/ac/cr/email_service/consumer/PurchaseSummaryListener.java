@@ -6,9 +6,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
-import ucr.ac.cr.email_service.models.PurchaseSummaryMessage;
+import ucr.ac.cr.email_service.events.PurchaseSummaryMessage;
 import ucr.ac.cr.email_service.service.EmailService;
 import ucr.ac.cr.email_service.templates.EmailTemplate;
+import ucr.ac.cr.email_service.templates.EmailTemplateName;
 
 import java.util.Map;
 
@@ -51,7 +52,7 @@ public class PurchaseSummaryListener {
         EmailTemplate template = new EmailTemplate(
                 msg.customerEmail(),
                 "Resumen de tu compra",
-                "order_summary_to_customer",
+                EmailTemplateName.ORDER_SUMMARY_TO_CUSTOMER,
                 variables,
                 null,
                 null
@@ -76,7 +77,7 @@ public class PurchaseSummaryListener {
             EmailTemplate template = new EmailTemplate(
                     order.pymeEmail(),
                     "Nuevo pedido recibido",
-                    "order_notification_to_pyme",
+                    EmailTemplateName.ORDER_NOTIFICATION_TO_PYME,
                     variables,
                     null,
                     null
