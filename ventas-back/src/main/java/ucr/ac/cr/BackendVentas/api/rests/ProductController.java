@@ -2,11 +2,13 @@ package ucr.ac.cr.BackendVentas.api.rests;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ucr.ac.cr.BackendVentas.api.mappers.ProductMapper;
 import ucr.ac.cr.BackendVentas.handlers.commands.ProductHandler;
 import ucr.ac.cr.BackendVentas.models.BaseException;
 import ucr.ac.cr.BackendVentas.models.ErrorCode;
 import ucr.ac.cr.BackendVentas.api.types.ProductRequest;
 import ucr.ac.cr.BackendVentas.api.types.Response;
+import ucr.ac.cr.BackendVentas.api.types.ProductDTO;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -140,14 +142,26 @@ public class ProductController {
             @RequestParam(required = false) BigDecimal priceMin,
             @RequestParam(required = false) BigDecimal priceMax
     ) {
-        var result = productHandler.searchProducts(term, categoryId, priceMin, priceMax);
+        ProductHandler.Result result;
 
-        if (result instanceof ProductHandler.Result.SuccessList successList) {
-            return new Response("Products retrieved", successList.products());
+        if (term == null && categoryId == null && priceMin == null && priceMax == null) {
+            result = productHandler.listAllProducts();
+        } else {
+            result = productHandler.searchProducts(term, categoryId, priceMin, priceMax);
+        }
+
+        if (result instanceof ProductHandler.Result.SuccessList(
+                List<ucr.ac.cr.BackendVentas.jpa.entities.ProductEntity> products
+        )) {
+            List<ProductDTO> dtoList = ProductMapper.toDTOList(products);
+
+            return new Response("Products retrieved", dtoList);
         } else {
             return new Response("No products found", List.of());
         }
+
     }
+
 
 
 

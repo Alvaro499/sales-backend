@@ -181,6 +181,18 @@ public class ProductHandlerImpl implements ProductHandler {
     }
 
 
+    public Result listAllProducts() {
+        // Obtener todos los productos
+        List<ProductEntity> products = productRepository.findAll();
+
+        if (products.isEmpty()) {
+            return new Result.NotFoundProduct();  // Si no hay productos
+        }
+
+        return new Result.SuccessList(products);  // Retorna los productos como una lista
+    }
+
+
 
 
 }

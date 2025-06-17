@@ -18,6 +18,7 @@ public interface ProductHandler {
 
     Result searchProducts(String term, Integer categoryId, BigDecimal priceMin, BigDecimal priceMax);
 
+    Result listAllProducts();
     // Command for creating a product
     record Command(String name, String description, BigDecimal price, List<String> category, List<String> images,
                    Boolean available, String promotion, Integer stock, UUID pymeId) {}
