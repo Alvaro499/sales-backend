@@ -9,6 +9,7 @@ import ucr.ac.cr.BackendVentas.jpa.repositories.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 @TestConfiguration
 public class DataInitializer {
@@ -55,9 +56,9 @@ public class DataInitializer {
     }
 
     private void createDataForBasic(CategoryEntity tech, CategoryEntity food, CategoryEntity decor) {
-        PymeEntity pyme1 = createPyme("Tech CR", "tech@example.com", "1234", "San José", "8888-1111", "Tienda de electrónicos", null);
-        PymeEntity pyme2 = createPyme("Delicias Ticas", "food@example.com", "1234", "Cartago", "8888-2222", "Snacks artesanales", null);
-        PymeEntity pyme3 = createPyme("Casa Bonita", "deco@example.com", "1234", "Alajuela", "8888-3333", "Decoración para el hogar", null);
+        PymeEntity pyme1 = createPyme("Tech CR", "tech@example.com", "San José", "8888-1111", "Tienda de electrónicos", null);
+        PymeEntity pyme2 = createPyme("Delicias Ticas", "food@example.com", "Cartago", "8888-2222", "Snacks artesanales", null);
+        PymeEntity pyme3 = createPyme("Casa Bonita", "deco@example.com", "Alajuela", "8888-3333", "Decoración para el hogar", null);
 
         pymeRepo.saveAll(List.of(pyme1, pyme2, pyme3));
 
@@ -71,9 +72,9 @@ public class DataInitializer {
     }
 
     private void createDataForRollback(CategoryEntity tech, CategoryEntity food, CategoryEntity decor) {
-        PymeEntity pymeRollback1 = createPyme("RollbackTech", "rollback-tech@example.com", "1234", "Heredia", "8888-4444", "Electrónica para pruebas", null);
-        PymeEntity pymeRollback2 = createPyme("RollbackFoods", "rollback-food@example.com", "1234", "Limón", "8888-5555", "Snacks para pruebas", null);
-        PymeEntity pymeRollback3 = createPyme("RollbackDeco", "rollback-deco@example.com", "1234", "Puntarenas", "8888-6666", "Decoración de prueba", null);
+        PymeEntity pymeRollback1 = createPyme("RollbackTech", "rollback-tech@example.com", "Heredia", "8888-4444", "Electrónica para pruebas", null);
+        PymeEntity pymeRollback2 = createPyme("RollbackFoods", "rollback-food@example.com", "Limón", "8888-5555", "Snacks para pruebas", null);
+        PymeEntity pymeRollback3 = createPyme("RollbackDeco", "rollback-deco@example.com","Puntarenas", "8888-6666", "Decoración de prueba", null);
 
         pymeRepo.saveAll(List.of(pymeRollback1, pymeRollback2, pymeRollback3));
 
@@ -90,16 +91,16 @@ public class DataInitializer {
 
     // Métodos auxiliares
 
-    private PymeEntity createPyme(String name, String email, String password, String address, String phone, String desc, String logoUrl) {
+    private PymeEntity createPyme(String name, String email, String address, String phone, String desc, String logoUrl) {
         PymeEntity p = new PymeEntity();
         p.setName(name);
         p.setEmail(email);
-        p.setPassword(password);
         p.setAddress(address);
         p.setPhone(phone);
         p.setDescription(desc);
         p.setLogoUrl(logoUrl);
         p.setActive(true);
+        p.setUserId(UUID.randomUUID());
         return p;
     }
 
