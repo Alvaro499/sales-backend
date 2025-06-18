@@ -17,6 +17,7 @@ import ucr.ac.cr.BackendVentas.jpa.repositories.OrderRepository;
 import ucr.ac.cr.BackendVentas.jpa.repositories.ProductRepository;
 import ucr.ac.cr.BackendVentas.models.BaseException;
 import ucr.ac.cr.BackendVentas.models.OrderProduct;
+import ucr.ac.cr.BackendVentas.utils.MonetaryUtils;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -236,8 +237,11 @@ public class CreateOrderTest {
         int cantidadCafe = 2;
         int cantidadAudifonos = 2;
 
-        BigDecimal totalEsperadoCafe = p1.getPrice().multiply(BigDecimal.valueOf(cantidadCafe)); // 5500 * 2
-        BigDecimal totalEsperadoAudifonos = p2.getPrice().multiply(BigDecimal.valueOf(cantidadAudifonos)); // 25000 * 2
+        BigDecimal precioUnitarioConPromoCafe = MonetaryUtils.applyPromotion(p1.getPrice(), p1.getPromotion());
+        BigDecimal precioUnitarioConPromoAudifonos = MonetaryUtils.applyPromotion(p2.getPrice(), p2.getPromotion());
+
+        BigDecimal totalEsperadoCafe = precioUnitarioConPromoCafe.multiply(BigDecimal.valueOf(cantidadCafe));
+        BigDecimal totalEsperadoAudifonos = precioUnitarioConPromoAudifonos.multiply(BigDecimal.valueOf(cantidadAudifonos));
 
         CreateOrderHandler.Command command = new CreateOrderHandler.Command(
                 UUID.randomUUID(),

@@ -94,6 +94,8 @@
                     <th>Producto</th>
                     <th>Cantidad</th>
                     <th>Precio Unitario</th>
+                    <th>Descuento</th>
+                    <th>Precio con Descuento</th>
                     <th>Subtotal</th>
                 </tr>
                 </thead>
@@ -102,9 +104,12 @@
                     <td th:text="${product.name}">Teclado Mecánico</td>
                     <td th:text="${product.quantity}">1</td>
                     <td th:text="${product.unitPrice}">₡25,000</td>
+                    <td th:text="${product.promotionApplied}">₡0</td>
+                    <td th:text="${product.priceWithDiscount}">₡25,000</td>
                     <td th:text="${product.subtotal}">₡25,000</td>
                 </tr>
                 </tbody>
+
             </table>
             <p><strong>Total de esta orden:</strong> <span th:text="${order.total}">₡25,000</span></p>
         </div>

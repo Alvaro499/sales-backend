@@ -1,4 +1,4 @@
-package ucr.ac.cr.email_service.events;
+package ucr.ac.cr.BackendVentas.events;
 
 import java.util.List;
 

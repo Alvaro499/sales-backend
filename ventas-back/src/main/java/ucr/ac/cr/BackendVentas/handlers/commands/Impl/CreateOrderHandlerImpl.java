@@ -13,6 +13,8 @@ import ucr.ac.cr.BackendVentas.jpa.entities.*;
 import ucr.ac.cr.BackendVentas.models.ErrorCode;
 import ucr.ac.cr.BackendVentas.models.OrderProduct;
 import ucr.ac.cr.BackendVentas.handlers.validators.OrderValidator;
+import ucr.ac.cr.BackendVentas.producers.PurchaseSummaryProducer;
+import ucr.ac.cr.BackendVentas.utils.MonetaryUtils;
 import ucr.ac.cr.BackendVentas.utils.ValidationUtils;
 
 import java.math.BigDecimal;
@@ -29,6 +31,7 @@ public class CreateOrderHandlerImpl implements CreateOrderHandler {
     private final OrderValidator orderValidator;
     private final PaymentMethodQuery paymentMethodQuery;
     private final ShippingMethodQuery shippingMethodQuery;
+    PurchaseSummaryProducer purchaseSummaryProducer;
 
     public CreateOrderHandlerImpl(OrderQuery orderQuery,
                                   ProductQuery productQuery,
@@ -107,9 +110,8 @@ public class CreateOrderHandlerImpl implements CreateOrderHandler {
             int quantity = orderProduct.quantity();
 
             ProductEntity product = productQuery.findById(productId).orElseThrow();
-            BigDecimal price = product.getPrice();
-
-            total = total.add(price.multiply(BigDecimal.valueOf(quantity)));
+            BigDecimal finalPrice = MonetaryUtils.applyPromotion(product.getPrice(), product.getPromotion());
+            total = total.add(finalPrice.multiply(BigDecimal.valueOf(quantity)));
         }
 
         return total;
