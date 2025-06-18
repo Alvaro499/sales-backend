@@ -9,8 +9,8 @@ import java.util.UUID;
 public interface PymeRepository extends JpaRepository <PymeEntity, String> {
 
     boolean existsByEmail(String email);
-
     boolean existsByName(String name);
-
     Optional<PymeEntity> findById(UUID uuid);
+    Optional<PymeEntity> findByEmail(String email);
+    Optional<PymeEntity> findByUserId(UUID name);
 }

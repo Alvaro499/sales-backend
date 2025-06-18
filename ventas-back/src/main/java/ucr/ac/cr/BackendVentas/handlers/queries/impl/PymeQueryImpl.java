@@ -23,4 +23,9 @@ public class PymeQueryImpl implements PymeQuery {
     public Optional<PymeEntity> findById(UUID uuid) {
         return pymeRepository.findById(uuid);
     }
+
+    @Override
+    public Optional<PymeEntity> findByUserId(UUID userId) {
+        return pymeRepository.findByUserId(userId);
+    }
 }

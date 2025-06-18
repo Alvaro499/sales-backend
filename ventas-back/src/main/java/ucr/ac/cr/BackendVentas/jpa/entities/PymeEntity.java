@@ -19,14 +19,14 @@ public class PymeEntity {
     @Column(name = "pyme_id", columnDefinition = "UUID", updatable = false, nullable = false)
     private UUID id;
 
+    @Column(name = "user_id", columnDefinition = "UUID", nullable = false)
+    private UUID userId;
+
     @Column(name = "name", length = 255, unique = true, nullable = false)
     private String name;
 
     @Column(name = "email", length = 255, unique = true, nullable = false)
     private String email;
-
-    @Column(name = "password", length = 255, nullable = false)
-    private String password;
 
     @Column(name = "address", length = 255, nullable = false)
     private String address;
@@ -55,6 +55,9 @@ public class PymeEntity {
         this.id = id;
     }
 
+    public UUID getUserId() { return userId; }
+    public void setUserId(UUID userId) { this.userId = userId; }
+
     public String getName() {
         return name;
     }
@@ -69,14 +72,6 @@ public class PymeEntity {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public String getAddress() {

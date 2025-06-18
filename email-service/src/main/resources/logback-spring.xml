@@ -1,0 +1,31 @@
+<configuration>
+
+    <property name="LOG_PATH" value="logs"/>
+    <property name="LOG_FILE" value="${LOG_PATH}/email-service-errors.log"/>
+
+    <appender name="EMAIL_FILE" class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_FILE}</file>
+        <append>true</append>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%level] %logger{10} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Solo errores del microservicio van al archivo -->
+    <logger name="ucr.ac.cr.email_service" level="ERROR" additivity="false">
+        <appender-ref ref="EMAIL_FILE"/>
+    </logger>
+
+    <!-- Todos los demás tipos de LOGS sigue saliendo en consola -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+</configuration>

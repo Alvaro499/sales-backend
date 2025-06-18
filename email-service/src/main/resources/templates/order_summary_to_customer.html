@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Resumen de tu compra</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 40px 0;
+        }
+
+        .outer-banner {
+            background-color: #007bff;
+            padding: 30px 20px;
+        }
+
+        .container {
+            background-color: #ffffff;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        h2 {
+            color: #333333;
+        }
+
+        p {
+            color: #555555;
+            line-height: 1.6;
+        }
+
+        .info-box {
+            background-color: #f1f1f1;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .order-section {
+            margin-top: 30px;
+        }
+
+        .product-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .product-table th,
+        .product-table td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        .product-table th {
+            background-color: #f2f2f2;
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 0.85em;
+            color: #999999;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="outer-banner">
+    <div class="container">
+        <h2>¡Gracias por tu compra!</h2>
+        <p>Hola <strong th:text="${firstName} + ' ' + ${lastName}">Juan Pérez</strong>, hemos recibido tu pedido correctamente.</p>
+
+        <h3>Resumen del pedido:</h3>
+        <div class="info-box">
+            <p><strong>Correo:</strong> <span th:text="${email}">cliente@correo.com</span></p>
+            <p><strong>Teléfono:</strong> <span th:text="${phone}">8888-8888</span></p>
+            <p><strong>Dirección de envío:</strong> <span th:text="${shippingAddress}">San José, Costa Rica</span></p>
+            <p><strong>Método de envío:</strong> <span th:text="${shippingMethod}">Entrega estándar</span></p>
+            <p><strong>Método de pago:</strong> <span th:text="${paymentMethod}">Transferencia</span></p>
+        </div>
+
+        <div th:each="order : ${orders}" class="order-section">
+            <h4 th:text="'Orden - ' + ${order.pymeName}">Orden - Tech CR</h4>
+            <table class="product-table">
+                <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Precio Unitario</th>
+                    <th>Subtotal</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="product : ${order.products}">
+                    <td th:text="${product.name}">Teclado Mecánico</td>
+                    <td th:text="${product.quantity}">1</td>
+                    <td th:text="${product.unitPrice}">₡25,000</td>
+                    <td th:text="${product.subtotal}">₡25,000</td>
+                </tr>
+                </tbody>
+            </table>
+            <p><strong>Total de esta orden:</strong> <span th:text="${order.total}">₡25,000</span></p>
+        </div>
+
+        <hr style="margin-top: 30px;">
+        <p><strong>Total general de tu compra:</strong> <span th:text="${grandTotal}">₡33,000</span></p>
+
+        <p>Recibirás actualizaciones por correo electrónico de cada pyme cuando tu pedido esté listo o en camino.</p>
+
+        <p>¡Gracias por confiar en nuestra plataforma!</p>
+
+        <div class="footer">
+            © 2025 Plataforma de Ventas. Todos los derechos reservados.
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
+
+
+<!--
+
+Variables Thymeleaf esperadas:
+Campo	Descripción
+${firstName} / ${lastName}	Nombre del cliente
+${email} / ${phone}	Contacto del cliente
+${shippingAddress}	Dirección de envío
+${shippingMethod}	Método de envío elegido
+${paymentMethod}	Forma de pago seleccionada
+${orders}	Lista de órdenes individuales por pyme
+${order.pymeName}	Nombre de la pyme correspondiente
+${order.products}	Productos de esa pyme
+${product.name}	Nombre del producto
+${product.quantity}	Cantidad
+${product.unitPrice}	Precio unitario
+${product.subtotal}	Subtotal del producto
+${order.total}	Total por orden (por pyme)
+${grandTotal}	Total de toda la compra
+
+-->
