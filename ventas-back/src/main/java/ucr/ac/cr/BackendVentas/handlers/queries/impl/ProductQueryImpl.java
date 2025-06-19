@@ -39,5 +39,10 @@ public class ProductQueryImpl implements ProductQuery {
         return productRepository.findById(uuid);
     }
 
+    @Override
+    public Optional<ProductEntity> findByName(String name) {
+        return productRepository.findByName(name);
+    }
+
 
 }

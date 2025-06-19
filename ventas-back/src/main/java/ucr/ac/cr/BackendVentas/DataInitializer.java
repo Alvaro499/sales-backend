@@ -1,16 +1,17 @@
 package ucr.ac.cr.BackendVentas;
 
 import jakarta.annotation.PostConstruct;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Autowired;
 import ucr.ac.cr.BackendVentas.jpa.entities.*;
 import ucr.ac.cr.BackendVentas.jpa.repositories.*;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+@Profile("!test")
 @Component
 public class DataInitializer {
 
@@ -21,8 +22,13 @@ public class DataInitializer {
     @Autowired private ShippingMethodRepository shippingRepo;
 
     @PostConstruct
-    public void init() {
+    public void testInit() {
+        System.out.println("DataInitializer de PRODUCCIÓN ejecutado (esto NO debería verse en tests)");
+    }
 
+    @PostConstruct
+    public void init() {
+        System.out.println("[PRODUCCIÓN] DataInitializer ejecutado.");
         if (categoryRepo.count() > 0 && pymeRepo.count() > 0 && productRepo.count() > 0 && paymentRepo.count() > 0 && shippingRepo.count() > 0) {
             return;
         }
@@ -79,12 +85,12 @@ public class DataInitializer {
         PymeEntity p = new PymeEntity();
         p.setName(name);
         p.setEmail(email);
-        p.setPassword(password);
         p.setAddress(address);
         p.setPhone(phone);
         p.setDescription(desc);
         p.setLogoUrl(logoUrl);
         p.setActive(true);
+        p.setUserId(UUID.randomUUID());
         return p;
     }
 
