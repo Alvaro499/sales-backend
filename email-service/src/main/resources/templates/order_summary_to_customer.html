@@ -88,6 +88,10 @@
 
         <div th:each="order : ${orders}" class="order-section">
             <h4 th:text="'Orden - ' + ${order.pymeName}">Orden - Tech CR</h4>
+
+            <p th:if="${#lists.isEmpty(order.products)}">No hay productos en esta orden</p>
+            <p th:unless="${#lists.isEmpty(order.products)}">Productos cargados correctamente</p>
+
             <table class="product-table">
                 <thead>
                 <tr>

@@ -111,7 +111,6 @@ public class CreateOrderHandlerImpl implements CreateOrderHandler {
 
             Optional<OrderEntity> savedOrder = orderQuery.save(newOrder);
             List<OrderLineEntity> associatedLines = orderLineHandler.createOrderLines(savedOrder.get(), products);
-            orderLineHandler.createOrderLines(savedOrder.get(), products);
             savedOrder.get().setOrderLines(associatedLines);
 
             orders.add(newOrder);

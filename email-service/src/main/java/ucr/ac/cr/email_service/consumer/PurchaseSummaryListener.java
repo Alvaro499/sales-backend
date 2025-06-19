@@ -21,6 +21,9 @@ public class PurchaseSummaryListener {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @KafkaListener(topics = "purchase-summary", groupId = "mail-service")
     public void consume(String jsonPayload) {
         try {
