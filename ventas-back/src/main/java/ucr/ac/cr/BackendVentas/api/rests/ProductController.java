@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ucr.ac.cr.BackendVentas.api.mappers.ProductMapper;
 import ucr.ac.cr.BackendVentas.handlers.commands.ProductHandler;
+import ucr.ac.cr.BackendVentas.jpa.entities.ProductEntity;
+import ucr.ac.cr.BackendVentas.jpa.repositories.ProductRepository;
 import ucr.ac.cr.BackendVentas.models.BaseException;
 import ucr.ac.cr.BackendVentas.models.ErrorCode;
 import ucr.ac.cr.BackendVentas.api.types.ProductRequest;
@@ -20,10 +22,12 @@ import java.util.UUID;
 public class ProductController {
 
     private final ProductHandler productHandler;
+    private final ProductRepository productRepository;
 
     @Autowired
-    public ProductController(ProductHandler productHandler) {
+    public ProductController(ProductHandler productHandler, ProductRepository productRepository) {
         this.productHandler = productHandler;
+        this.productRepository = productRepository;
     }
 
     @PostMapping
@@ -61,6 +65,22 @@ public class ProductController {
 
             default -> throw new IllegalStateException("Unexpected result: " + result);
         };
+    }
+
+    @GetMapping("/info/{productID}")
+    public Response listProductsInfo(@PathVariable UUID productID) {
+        // Buscar el producto en la base de datos usando el productID
+        ProductEntity product = productRepository.findById(productID)
+                .orElseThrow(() -> BaseException.exceptionBuilder()
+                        .code(ErrorCode.PRODUCT_NOT_FOUND)
+                        .message("Product not found")
+                        .build());
+
+        // Mapear el producto a un DTO (opcional, si estás usando DTOs)
+        ProductDTO productDTO = ProductMapper.toDTO(product);
+
+        // Retornar la respuesta con el producto
+        return new Response("Product retrieved", productDTO);
     }
 
 
