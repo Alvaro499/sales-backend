@@ -17,6 +17,7 @@ import ucr.ac.cr.BackendVentas.jpa.repositories.OrderRepository;
 import ucr.ac.cr.BackendVentas.jpa.repositories.ProductRepository;
 import ucr.ac.cr.BackendVentas.models.BaseException;
 import ucr.ac.cr.BackendVentas.models.OrderProduct;
+import ucr.ac.cr.BackendVentas.producers.PurchaseSummaryProducer;
 import ucr.ac.cr.BackendVentas.utils.MonetaryUtils;
 
 import java.math.BigDecimal;
@@ -47,6 +48,9 @@ public class CreateOrderTest {
     @MockitoBean(answers = Answers.CALLS_REAL_METHODS)
     private OrderLineHandler orderLineHandler;
 
+    @MockitoBean
+    private PurchaseSummaryProducer purchaseSummaryProducer;
+
     /**
      * Test Case: CP-ORDER-001
      * Description: Should create an order for an existing product and return correct total.
@@ -65,7 +69,7 @@ public class CreateOrderTest {
 
         CreateOrderHandler.Command command = new CreateOrderHandler.Command(
                 UUID.randomUUID(), // usuario anónimo
-                "client@example.com",
+                "alvarosiles499@gmail.com",
                 "Ana",
                 "Pérez",
                 "1234-0000",
@@ -280,6 +284,84 @@ public class CreateOrderTest {
             }
         }
     }
+
+    /**
+     * Caso de prueba: createOrder_MultiplePymes_ShouldCalculateCorrectPromotions
+     *
+     * Se evalúan 3 productos con diferentes configuraciones de promoción:
+     *
+     * | Producto                      | Precio Original | Promoción | Cantidad | Precio Final Unitario | Total por Producto |
+     * |------------------------------|------------------|-----------|----------|------------------------|---------------------|
+     * | Promo90 - Smartwatch         | ₡50,000.00       | 90%       | 2        | ₡5,000.00              | ₡10,000.00          |
+     * | Promo0 - Barritas Naturales  | ₡1,500.00        | 0%        | 3        | ₡1,500.00              | ₡4,500.00           |
+     * | PromoNull - Cuadro Decorativo| ₡25,000.00       | null (0%) | 1        | ₡25,000.00             | ₡25,000.00          |
+     *
+     * Total general esperado: ₡10,000 + ₡4,500 + ₡25,000 = ₡39,500.00
+     *
+     * Validaciones:
+     * - Se crean 3 órdenes (una por pyme distinta).
+     * - El total acumulado coincide con el total esperado.
+     * - Se aplican correctamente los descuentos según la lógica de negocio.
+     */
+    @Test
+    void createOrder_MultiplePymes_ShouldCalculateCorrectPromotions() {
+        Optional<ProductEntity> smartwatchOpt = productRepo.findByName("Promo90 - Smartwatch");
+        Optional<ProductEntity> barritasOpt = productRepo.findByName("Promo0 - Barritas Naturales");
+        Optional<ProductEntity> cuadroOpt = productRepo.findByName("PromoNull - Cuadro Decorativo");
+
+        assertTrue(smartwatchOpt.isPresent(), "Producto 'Promo90 - Smartwatch' no encontrado");
+        assertTrue(barritasOpt.isPresent(), "Producto 'Promo0 - Barritas Naturales' no encontrado");
+        assertTrue(cuadroOpt.isPresent(), "Producto 'PromoNull - Cuadro Decorativo' no encontrado");
+
+        ProductEntity smartwatch = smartwatchOpt.get(); // Pyme: PromoTech
+        ProductEntity barritas = barritasOpt.get();     // Pyme: PromoFood
+        ProductEntity cuadro = cuadroOpt.get();         // Pyme: PromoDeco
+
+        int qtySmartwatch = 2;
+        int qtyBarritas = 3;
+        int qtyCuadro = 1;
+
+        BigDecimal totalSmartwatch = MonetaryUtils.applyPromotion(smartwatch.getPrice(), smartwatch.getPromotion())
+                .multiply(BigDecimal.valueOf(qtySmartwatch));
+        BigDecimal totalBarritas = MonetaryUtils.applyPromotion(barritas.getPrice(), barritas.getPromotion())
+                .multiply(BigDecimal.valueOf(qtyBarritas));
+        BigDecimal totalCuadro = MonetaryUtils.applyPromotion(cuadro.getPrice(), cuadro.getPromotion())
+                .multiply(BigDecimal.valueOf(qtyCuadro));
+
+        BigDecimal totalEsperado = totalSmartwatch.add(totalBarritas).add(totalCuadro);
+
+        CreateOrderHandler.Command command = new CreateOrderHandler.Command(
+                UUID.randomUUID(),
+                "promo@test.com",
+                "Laura", "Promo",
+                "1111-2222",
+                "Monteverde",
+                "EFECTIVO",
+                "ENTREGA_LOCAL",
+                List.of(
+                        new OrderProduct(smartwatch.getId(), qtySmartwatch),
+                        new OrderProduct(barritas.getId(), qtyBarritas),
+                        new OrderProduct(cuadro.getId(), qtyCuadro)
+                )
+        );
+
+        CreateOrderHandler.Result result = createOrderHandler.handle(command);
+        assertInstanceOf(CreateOrderHandler.Result.Success.class, result);
+
+        List<UUID> orderIds = ((CreateOrderHandler.Result.Success) result).orderIds();
+        assertEquals(3, orderIds.size(), "Se esperaban 3 órdenes (una por pyme diferente)");
+
+        BigDecimal totalAcumulado = BigDecimal.ZERO;
+
+        for (UUID orderId : orderIds) {
+            Optional<OrderEntity> orderOpt = orderRepo.findById(orderId);
+            assertTrue(orderOpt.isPresent(), "Orden no encontrada");
+            totalAcumulado = totalAcumulado.add(orderOpt.get().getTotalAmount());
+        }
+
+        assertEquals(0, totalAcumulado.compareTo(totalEsperado), "Total acumulado no coincide con la suma esperada");
+    }
+
 
     /**
      * ??-ORDER-ROLLBACK-001

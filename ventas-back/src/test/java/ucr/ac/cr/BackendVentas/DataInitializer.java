@@ -53,6 +53,7 @@ public class DataInitializer {
 
         createDataForBasic(tech, food, decor);
         createDataForRollback(tech, food, decor);
+        createDataForPromotion(tech, food, decor);
     }
 
     private void createDataForBasic(CategoryEntity tech, CategoryEntity food, CategoryEntity decor) {
@@ -87,6 +88,26 @@ public class DataInitializer {
                 createProduct("Velas Aromáticas", "Set de velas con esencias", new BigDecimal("9500"), 70, decor, pymeRollback3)
         ));
     }
+
+    private void createDataForPromotion(CategoryEntity tech, CategoryEntity food, CategoryEntity decor) {
+        PymeEntity promoTech = createPyme("PromoTech", "promo-tech@example.com", "Guanacaste", "7777-0000", "Tecnología con promos", null);
+        PymeEntity promoFood = createPyme("PromoFood", "promo-food@example.com", "San Carlos", "7777-1111", "Comida con promos", null);
+        PymeEntity promoDeco = createPyme("PromoDeco", "promo-deco@example.com", "Liberia", "7777-2222", "Decoración con promos", null);
+
+        pymeRepo.saveAll(List.of(promoTech, promoFood, promoDeco));
+
+        ProductEntity p90 = createProduct("Promo90 - Smartwatch", "Reloj inteligente con 90% descuento", new BigDecimal("50000"), 10, tech, promoTech);
+        p90.setPromotion(new BigDecimal("0.90"));
+
+        ProductEntity p0 = createProduct("Promo0 - Barritas Naturales", "Snacks saludables sin descuento", new BigDecimal("1500"), 30, food, promoFood);
+        p0.setPromotion(BigDecimal.ZERO);
+
+        ProductEntity pNull = createProduct("PromoNull - Cuadro Decorativo", "Decoración sin promo definida", new BigDecimal("25000"), 5, decor, promoDeco);
+        pNull.setPromotion(null); // explícitamente nulo
+
+        productRepo.saveAll(List.of(p90, p0, pNull));
+    }
+
 
 
     // Métodos auxiliares

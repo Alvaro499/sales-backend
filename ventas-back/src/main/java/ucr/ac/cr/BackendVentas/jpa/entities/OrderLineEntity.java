@@ -3,6 +3,7 @@ package ucr.ac.cr.BackendVentas.jpa.entities;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 import org.hibernate.annotations.GenericGenerator;

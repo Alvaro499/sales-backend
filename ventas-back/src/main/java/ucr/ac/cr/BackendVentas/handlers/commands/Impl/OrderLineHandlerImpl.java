@@ -13,6 +13,7 @@ import ucr.ac.cr.BackendVentas.utils.MonetaryUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.List;
 
 import static ucr.ac.cr.BackendVentas.utils.ValidationUtils.validationError;
@@ -29,6 +30,35 @@ public class OrderLineHandlerImpl implements OrderLineHandler {
     }
 
     //Aqui usamos OrderProduct (que debería llamarse OrderedProducts)
+
+    @Override
+    public List<OrderLineEntity> createOrderLines(OrderEntity order, List<OrderProduct> productsByOrder) {
+        List<OrderLineEntity> lines = new ArrayList<>();
+        for (OrderProduct product : productsByOrder) {
+            OrderLineEntity line = new OrderLineEntity();
+            line.setOrder(order);
+
+            ProductEntity productEntity = productRepository.findById(product.productId())
+                    .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado"));
+
+            BigDecimal originalPrice = productEntity.getPrice();
+            BigDecimal promotion = productEntity.getPromotion() != null ? productEntity.getPromotion() : BigDecimal.ZERO;
+
+            BigDecimal priceWithDiscount = MonetaryUtils.applyPromotion(originalPrice, promotion);
+            BigDecimal subtotal = priceWithDiscount.multiply(BigDecimal.valueOf(product.quantity()));
+
+            line.setProduct(productEntity);
+            line.setQuantity(product.quantity());
+            line.setUnitPrice(originalPrice);
+            line.setPromotionApplied(promotion);
+            line.setPriceWithDiscount(priceWithDiscount);
+            line.setSubtotal(subtotal);
+
+            orderLineQuery.save(line);
+        }
+        return lines;
+    }
+    /*
     @Override
     public void createOrderLines(OrderEntity order, List<OrderProduct> productsByOrder) {
         for (OrderProduct product : productsByOrder) {
@@ -54,4 +84,5 @@ public class OrderLineHandlerImpl implements OrderLineHandler {
             orderLineQuery.save(line);
         }
     }
+    */
 }
