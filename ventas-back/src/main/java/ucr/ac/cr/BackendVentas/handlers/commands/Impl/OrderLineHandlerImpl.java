@@ -34,55 +34,47 @@ public class OrderLineHandlerImpl implements OrderLineHandler {
     @Override
     public List<OrderLineEntity> createOrderLines(OrderEntity order, List<OrderProduct> productsByOrder) {
         List<OrderLineEntity> lines = new ArrayList<>();
+
         for (OrderProduct product : productsByOrder) {
-            OrderLineEntity line = new OrderLineEntity();
-            line.setOrder(order);
-
-            ProductEntity productEntity = productRepository.findById(product.productId())
-                    .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado"));
-
-            BigDecimal originalPrice = productEntity.getPrice();
-            BigDecimal promotion = productEntity.getPromotion() != null ? productEntity.getPromotion() : BigDecimal.ZERO;
-
-            BigDecimal priceWithDiscount = MonetaryUtils.applyPromotion(originalPrice, promotion);
-            BigDecimal subtotal = priceWithDiscount.multiply(BigDecimal.valueOf(product.quantity()));
-
-            line.setProduct(productEntity);
-            line.setQuantity(product.quantity());
-            line.setUnitPrice(originalPrice);
-            line.setPromotionApplied(promotion);
-            line.setPriceWithDiscount(priceWithDiscount);
-            line.setSubtotal(subtotal);
-
-            orderLineQuery.save(line);
+            OrderLineEntity line = buildOrderLine(order, product);
+            OrderLineEntity savedLine = saveOrderLine(line);
+            lines.add(savedLine);
         }
+
         return lines;
     }
-    /*
-    @Override
-    public void createOrderLines(OrderEntity order, List<OrderProduct> productsByOrder) {
-        for (OrderProduct product : productsByOrder) {
-            OrderLineEntity line = new OrderLineEntity();
-            line.setOrder(order);
 
-            ProductEntity productEntity = productRepository.findById(product.productId())
-                    .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado"));
+    private OrderLineEntity buildOrderLine(OrderEntity order, OrderProduct product) {
+        ProductEntity productEntity = productRepository.findById(product.productId())
+                .orElseThrow(() -> validationError(
+                        "Producto no encontrado: " + product.productId(),
+                        ErrorCode.ENTITY_NOT_FOUND,
+                        "product"
+                ));
 
-            BigDecimal originalPrice = productEntity.getPrice();
-            BigDecimal promotion = productEntity.getPromotion() != null ? productEntity.getPromotion() : BigDecimal.ZERO;
+        BigDecimal originalPrice = productEntity.getPrice();
+        BigDecimal promotion = productEntity.getPromotion() != null ? productEntity.getPromotion() : BigDecimal.ZERO;
+        BigDecimal priceWithDiscount = MonetaryUtils.applyPromotion(originalPrice, promotion);
+        BigDecimal subtotal = priceWithDiscount.multiply(BigDecimal.valueOf(product.quantity()));
 
-            BigDecimal priceWithDiscount = MonetaryUtils.applyPromotion(originalPrice, promotion);
-            BigDecimal subtotal = priceWithDiscount.multiply(BigDecimal.valueOf(product.quantity()));
+        OrderLineEntity line = new OrderLineEntity();
+        line.setOrder(order);
+        line.setProduct(productEntity);
+        line.setQuantity(product.quantity());
+        line.setUnitPrice(originalPrice);
+        line.setPromotionApplied(promotion);
+        line.setPriceWithDiscount(priceWithDiscount);
+        line.setSubtotal(subtotal);
 
-            line.setProduct(productEntity);
-            line.setQuantity(product.quantity());
-            line.setUnitPrice(originalPrice);
-            line.setPromotionApplied(promotion);
-            line.setPriceWithDiscount(priceWithDiscount);
-            line.setSubtotal(subtotal);
-
-            orderLineQuery.save(line);
-        }
+        return line;
     }
-    */
+
+    private OrderLineEntity saveOrderLine(OrderLineEntity line) {
+        return orderLineQuery.save(line).orElseThrow(() -> validationError(
+                "No se pudo guardar la línea de orden",
+                ErrorCode.UNEXPECTED_ERROR,
+                "orderLine"
+        ));
+    }
+
 }

@@ -113,7 +113,7 @@ public class CreateOrderHandlerImpl implements CreateOrderHandler {
             List<OrderLineEntity> associatedLines = orderLineHandler.createOrderLines(savedOrder.get(), products);
             savedOrder.get().setOrderLines(associatedLines);
 
-            orders.add(newOrder);
+            orders.add(savedOrder.get());
         }
         return orders;
     }
