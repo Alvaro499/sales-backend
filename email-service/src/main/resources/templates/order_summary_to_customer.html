@@ -87,7 +87,7 @@
         </div>
 
         <div th:each="order : ${orders}" class="order-section">
-            <h4 th:text="'Orden - ' + order.pymeName">Orden - Tech CR</h4>
+            <h4 th:text="'Orden - ' + ${order.pymeName}">Orden - Tech CR</h4>
 
             <p th:if="${#lists.isEmpty(order.products)}">No hay productos en esta orden</p>
             <p th:unless="${#lists.isEmpty(order.products)}">Productos cargados correctamente</p>
@@ -107,25 +107,23 @@
                 <tr th:each="product : ${order.products}">
                     <td th:text="${product.name}">Teclado Mecánico</td>
                     <td th:text="${product.quantity}">1</td>
-                    <td th:text="${'₡' + #numbers.formatDecimal(product.unitPrice, 1, 2, 'COMMA')}">₡25,000.00</td>
-                    <td th:text="${#numbers.formatPercent(1 - product.promotionApplied, 1, 2)}">10%</td>
-                    <td th:text="${'₡' + #numbers.formatDecimal(product.priceWithDiscount, 1, 2, 'COMMA')}">₡22,500.00</td>
-                    <td th:text="${'₡' + #numbers.formatDecimal(product.subtotal, 1, 2, 'COMMA')}">₡22,500.00</td>
+                    <td><span>₡</span><span th:text="${product.unitPrice}">25000.00</span></td>
+                    <td th:text="${product.promotionApplied}">0.00</td>
+                    <td><span>₡</span><span th:text="${product.priceWithDiscount}">25000.00</span></td>
+                    <td><span>₡</span><span th:text="${product.subtotal}">25000.00</span></td>
                 </tr>
                 </tbody>
             </table>
 
-            <p>
-                <strong>Total de esta orden:</strong>
-                <span th:text="${#strings.format('₡%,.2f', order.total)}">₡25,000.00</span>
+            <p><strong>Total de esta orden:</strong>
+                <span>₡</span><span th:text="${order.total}">25000.00</span>
             </p>
         </div>
 
         <hr style="margin-top: 30px;">
 
-        <p>
-            <strong>Total general de tu compra:</strong>
-            <span th:text="${#strings.format('₡%,.2f', grandTotal)}">₡33,000.00</span>
+        <p><strong>Total general de tu compra:</strong>
+            <span>₡</span><span th:text="${grandTotal}">33000.00</span>
         </p>
 
         <p>Recibirás actualizaciones por correo electrónico de cada pyme cuando tu pedido esté listo o en camino.</p>
@@ -141,25 +139,3 @@
 
 </body>
 </html>
-
-
-<!--
-
-Variables Thymeleaf esperadas:
-Campo	Descripción
-${firstName} / ${lastName}	Nombre del cliente
-${email} / ${phone}	Contacto del cliente
-${shippingAddress}	Dirección de envío
-${shippingMethod}	Método de envío elegido
-${paymentMethod}	Forma de pago seleccionada
-${orders}	Lista de órdenes individuales por pyme
-${order.pymeName}	Nombre de la pyme correspondiente
-${order.products}	Productos de esa pyme
-${product.name}	Nombre del producto
-${product.quantity}	Cantidad
-${product.unitPrice}	Precio unitario
-${product.subtotal}	Subtotal del producto
-${order.total}	Total por orden (por pyme)
-${grandTotal}	Total de toda la compra
-
--->

@@ -48,7 +48,7 @@ public class PurchaseSummaryAssembler {
                 request.shippingAddress(),
                 request.shippingMethod(),
                 request.paymentMethod(),
-                calculateGrandTotal(orders).toString(),
+                calculateGrandTotal(orders),
                 pymeOrders
         );
     }
@@ -67,7 +67,7 @@ public class PurchaseSummaryAssembler {
         return new PurchaseSummaryMessage.PymeOrder(
                 pyme.getEmail(),
                 pyme.getName(),
-                order.getTotalAmount().toString(),
+                order.getTotalAmount(),
                 products
         );
     }
@@ -76,10 +76,10 @@ public class PurchaseSummaryAssembler {
         return new PurchaseSummaryMessage.Product(
                 line.getProduct().getName(),
                 line.getQuantity(),
-                line.getUnitPrice().toString(),
-                line.getPriceWithDiscount().toString(),
-                line.getPromotionApplied().toString(),
-                line.getSubtotal().toString()
+                line.getUnitPrice(),
+                line.getPriceWithDiscount(),
+                line.getPromotionApplied(),
+                line.getSubtotal()
         );
     }
 }

@@ -73,6 +73,8 @@ public class PurchaseSummaryListener {
                     "email", msg.customerEmail(),
                     "phone", msg.phone(),
                     "shippingAddress", msg.shippingAddress(),
+                    "shippingMethod", msg.shippingMethod(),
+                    "paymentMethod", msg.paymentMethod(),
                     "products", order.products(),
                     "orderTotal", order.total()
             );

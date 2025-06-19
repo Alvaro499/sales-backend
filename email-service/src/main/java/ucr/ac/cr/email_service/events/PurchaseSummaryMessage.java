@@ -1,5 +1,6 @@
 package ucr.ac.cr.email_service.events;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public record PurchaseSummaryMessage(
@@ -9,25 +10,24 @@ public record PurchaseSummaryMessage(
         String phone,
         String shippingAddress,
         String shippingMethod,
-        String paymentMethod,
-        String grandTotal,
+        String  paymentMethod,
+        BigDecimal grandTotal,
         List<PymeOrder> orders
 ) {
 
     public record PymeOrder(
             String pymeEmail,
             String pymeName,
-            String total,
+            BigDecimal total,
             List<Product> products
     ) {}
 
     public record Product(
             String name,
             int quantity,
-            String unitPrice,
-            String priceWithDiscount,
-            String promotionApplied,
-            String subtotal
+            BigDecimal  unitPrice,
+            BigDecimal  priceWithDiscount,
+            BigDecimal  promotionApplied,
+            BigDecimal  subtotal
     ) {}
 }
-

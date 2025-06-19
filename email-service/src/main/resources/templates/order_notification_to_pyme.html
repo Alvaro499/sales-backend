@@ -79,6 +79,8 @@
             <p><strong>Email:</strong> <span th:text="${email}">cliente@correo.com</span></p>
             <p><strong>Teléfono:</strong> <span th:text="${phone}">8888-8888</span></p>
             <p><strong>Dirección de envío:</strong> <span th:text="${shippingAddress}">San José, Costa Rica</span></p>
+            <p><strong>Método de envío:</strong> <span th:text="${shippingMethod}">Entrega estándar</span></p>
+            <p><strong>Método de pago:</strong> <span th:text="${paymentMethod}">Transferencia</span></p>
         </div>
 
         <h3>🛒 Productos solicitados:</h3>
@@ -97,17 +99,16 @@
             <tr th:each="product : ${products}">
                 <td th:text="${product.name}">Teclado Mecánico</td>
                 <td th:text="${product.quantity}">1</td>
-                <td th:text="${#strings.format('₡%,.2f', product.unitPrice)}">₡25,000.00</td>
-                <td th:text="${#numbers.formatPercent(product.promotionApplied, 1, 2)}">0%</td>
-                <td th:text="${#strings.format('₡%,.2f', product.priceWithDiscount)}">₡25,000.00</td>
-                <td th:text="${#strings.format('₡%,.2f', product.subtotal)}">₡25,000.00</td>
+                <td><span>₡</span><span th:text="${product.unitPrice}">25000.0</span></td>
+                <td th:text="${product.promotionApplied}">0.00</td>
+                <td><span>₡</span><span th:text="${product.priceWithDiscount}">25000.00</span></td>
+                <td><span>₡</span><span th:text="${product.subtotal}">25000.00</span></td>
             </tr>
             </tbody>
         </table>
 
-        <p>
-            <strong>Total del pedido:</strong>
-            <span th:text="${#strings.format('₡%,.2f', orderTotal)}">₡25,000.00</span>
+        <p><strong>Total del pedido:</strong>
+            <span>₡</span><span th:text="${orderTotal}">25000.00</span>
         </p>
 
         <p>Por favor, procede con la preparación y envío según el método elegido por el cliente.</p>
@@ -119,6 +120,8 @@
         </div>
     </div>
 </div>
+
+
 
 
 </body>
