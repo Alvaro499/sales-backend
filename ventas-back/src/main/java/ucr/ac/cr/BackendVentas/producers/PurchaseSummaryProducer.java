@@ -11,9 +11,9 @@ public class PurchaseSummaryProducer {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
-    public PurchaseSummaryProducer(KafkaTemplate<String, String> kafkaTemplate) {
+    public PurchaseSummaryProducer(KafkaTemplate<String, String> kafkaTemplate, ObjectMapper objectMapper) {
         this.kafkaTemplate = kafkaTemplate;
-        this.objectMapper = new ObjectMapper();
+        this.objectMapper = objectMapper;
     }
 
     public boolean sendEmailSummary(PurchaseSummaryMessage event) {

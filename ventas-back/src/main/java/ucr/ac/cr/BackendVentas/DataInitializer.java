@@ -63,9 +63,9 @@ public class DataInitializer {
         ));
 
         // --- Crear Pymes ---
-        PymeEntity pyme1 = createPyme("Tech CR", "pymetesting325@yopmail.com", "1234", "San José", "8888-1111", "Tienda de electrónicos", null);
-        PymeEntity pyme2 = createPyme("Delicias Ticas", "pymetesting325@yopmail.com", "1234", "Cartago", "8888-2222", "Snacks artesanales", null);
-        PymeEntity pyme3 = createPyme("Casa Bonita", "pymetesting325@yopmail.com", "1234", "Alajuela", "8888-3333", "Decoración para el hogar", null);
+        PymeEntity pyme1 = createPyme("Tech CR", "pymetesting25@yopmail.com", "San José", "8888-1111", "Tienda de electrónicos", null);
+        PymeEntity pyme2 = createPyme("Delicias Ticas", "pymetesting225@yopmail.com", "Cartago", "8888-2222", "Snacks artesanales", null);
+        PymeEntity pyme3 = createPyme("Casa Bonita", "pymetesting325@yopmail.com", "Alajuela", "8888-3333", "Decoración para el hogar", null);
 
         pymeRepo.saveAll(List.of(pyme1, pyme2, pyme3));
 
@@ -87,7 +87,7 @@ public class DataInitializer {
 
     // Métodos auxiliares
 
-    private PymeEntity createPyme(String name, String email, String password, String address, String phone, String desc, String logoUrl) {
+    private PymeEntity createPyme(String name, String email, String address, String phone, String desc, String logoUrl) {
         PymeEntity p = new PymeEntity();
         p.setName(name);
         p.setEmail(email);

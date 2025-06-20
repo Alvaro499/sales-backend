@@ -28,8 +28,7 @@ public class PurchaseSummaryListener {
     public void consume(String jsonPayload) {
         try {
             ObjectMapper mapper = new ObjectMapper();
-            PurchaseSummaryMessage msg = mapper.readValue(jsonPayload, PurchaseSummaryMessage.class);
-
+            PurchaseSummaryMessage msg = objectMapper.readValue(jsonPayload, PurchaseSummaryMessage.class);
             sendEmailToCustomer(msg);
             sendEmailsToPymes(msg);
 
