@@ -63,9 +63,9 @@ public class DataInitializer {
         ));
 
         // --- Crear Pymes ---
-        PymeEntity pyme1 = createPyme("Tech CR", "aldasi2000@hotmail.com", "1234", "San José", "8888-1111", "Tienda de electrónicos", null);
-        PymeEntity pyme2 = createPyme("Delicias Ticas", "alvaro.siles@ucr.ac.cr", "1234", "Cartago", "8888-2222", "Snacks artesanales", null);
-        PymeEntity pyme3 = createPyme("Casa Bonita", "lorenaquedadagomez@gmail.com", "1234", "Alajuela", "8888-3333", "Decoración para el hogar", null);
+        PymeEntity pyme1 = createPyme("Tech CR", "pymetesting325@yopmail.com", "1234", "San José", "8888-1111", "Tienda de electrónicos", null);
+        PymeEntity pyme2 = createPyme("Delicias Ticas", "pymetesting325@yopmail.com", "1234", "Cartago", "8888-2222", "Snacks artesanales", null);
+        PymeEntity pyme3 = createPyme("Casa Bonita", "pymetesting325@yopmail.com", "1234", "Alajuela", "8888-3333", "Decoración para el hogar", null);
 
         pymeRepo.saveAll(List.of(pyme1, pyme2, pyme3));
 
