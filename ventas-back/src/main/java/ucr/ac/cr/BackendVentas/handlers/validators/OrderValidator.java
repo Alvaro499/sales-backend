@@ -23,13 +23,15 @@ public class OrderValidator {
     private final PymeQuery pymeQuery;
     private final PaymentMethodQuery paymentMethodQuery;
     private final ShippingMethodQuery shippingMethodQuery;
+    private final OrderLineValidator orderLineValidator;
 
     public OrderValidator(ProductQuery productQuery, PymeQuery pymeQuery,
-                          PaymentMethodQuery paymentMethodQuery, ShippingMethodQuery shippingMethodQuery) {
+                          PaymentMethodQuery paymentMethodQuery, ShippingMethodQuery shippingMethodQuery, OrderLineValidator orderLineValidator) {
         this.productQuery = productQuery;
         this.pymeQuery = pymeQuery;
         this.paymentMethodQuery = paymentMethodQuery;
         this.shippingMethodQuery = shippingMethodQuery;
+        this.orderLineValidator = orderLineValidator;
     }
 
 
@@ -84,6 +86,9 @@ public class OrderValidator {
                     throw validationError("Producto no encontrado: " + orderedProduct.productId(), ErrorCode.ENTITY_NOT_FOUND, "products");
                 }
                 ProductEntity product = foundProduct.get();
+
+                orderLineValidator.validatePromotion(product);
+
                 if (!product.isActive() || !product.getAvailable()) {
                     throw validationError("El producto '" + product.getName() + "' no está disponible", ErrorCode.INVALID_FORMAT, "products");
                 }

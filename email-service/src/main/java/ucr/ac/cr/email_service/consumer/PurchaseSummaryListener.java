@@ -21,12 +21,14 @@ public class PurchaseSummaryListener {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @KafkaListener(topics = "purchase-summary", groupId = "mail-service")
     public void consume(String jsonPayload) {
         try {
             ObjectMapper mapper = new ObjectMapper();
-            PurchaseSummaryMessage msg = mapper.readValue(jsonPayload, PurchaseSummaryMessage.class);
-
+            PurchaseSummaryMessage msg = objectMapper.readValue(jsonPayload, PurchaseSummaryMessage.class);
             sendEmailToCustomer(msg);
             sendEmailsToPymes(msg);
 
@@ -70,6 +72,8 @@ public class PurchaseSummaryListener {
                     "email", msg.customerEmail(),
                     "phone", msg.phone(),
                     "shippingAddress", msg.shippingAddress(),
+                    "shippingMethod", msg.shippingMethod(),
+                    "paymentMethod", msg.paymentMethod(),
                     "products", order.products(),
                     "orderTotal", order.total()
             );
