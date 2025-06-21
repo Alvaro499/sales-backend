@@ -1,5 +1,6 @@
 package ucr.ac.cr.BackendVentas.producers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -9,21 +10,24 @@ import ucr.ac.cr.BackendVentas.events.SendUserPymeIdEvent;
 public class SendUserPymeIdProducer {
 
     private final KafkaTemplate<String, String> kafkaTemplate;
+    private final ObjectMapper objectMapper;
 
-    private static final String TOPIC = "register-user";
+    private static final String TOPIC = "register-user1";
 
     @Autowired
     public SendUserPymeIdProducer(KafkaTemplate<String, String> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
+        this.objectMapper = new ObjectMapper();
     }
 
     public boolean sendUserPymeId(SendUserPymeIdEvent event) {
         try {
-            String message = "PymeId: " + event.getUserRegistrationDTO().pymeId() + " | UserId: " + event.getUserRegistrationDTO().userId();
-            kafkaTemplate.send(TOPIC, message);  // Enviamos el mensaje en el topic "register-user"
+            String json = objectMapper.writeValueAsString(event.getUserRegistrationDTO());
+            kafkaTemplate.send(TOPIC, json);
             return true;
         } catch (Exception e) {
-            return false;  // Si hubo un error, devolvemos false
+            System.err.println("Error al enviar mensaje Kafka: " + e.getMessage());
+            return false;
         }
     }
 }

@@ -16,17 +16,14 @@ public class KafkaConsumerService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @KafkaListener(topics = "register-user", groupId = "auth-service")
-    public void listen(String message) {
+    @KafkaListener(topics = "register-user1", groupId = "auth-service")
+    public void listen(RegisterUserPymeDTO dto) {
         try {
-            RegisterUserPymeDTO dto = objectMapper.readValue(message, RegisterUserPymeDTO.class);
-
             UserPymeEntity entity = new UserPymeEntity();
             entity.setUserId(dto.userId());
             entity.setPymeId(dto.pymeId());
 
             repository.save(entity);
-            System.out.println("Guardado en base de datos: " + dto.userId() + " -> " + dto.pymeId());
 
         } catch (Exception e) {
             System.err.println("Error al procesar mensaje Kafka: " + e.getMessage());
