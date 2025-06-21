@@ -8,6 +8,7 @@ import ucr.ac.cr.BackendVentas.jpa.entities.*;
 import ucr.ac.cr.BackendVentas.jpa.repositories.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,6 +21,8 @@ public class DataInitializer {
     @Autowired private CategoryRepository categoryRepo;
     @Autowired private PaymentMethodRepository paymentRepo;
     @Autowired private ShippingMethodRepository shippingRepo;
+    @Autowired private ClientRepository clientRepo;
+
 
     @PostConstruct
     public void testInit() {
@@ -29,7 +32,7 @@ public class DataInitializer {
     @PostConstruct
     public void init() {
         System.out.println("[PRODUCCIÓN] DataInitializer ejecutado.");
-        if (categoryRepo.count() > 0 && pymeRepo.count() > 0 && productRepo.count() > 0 && paymentRepo.count() > 0 && shippingRepo.count() > 0) {
+        if (categoryRepo.count() > 0 && pymeRepo.count() > 0 && productRepo.count() > 0 && paymentRepo.count() > 0 && shippingRepo.count() > 0 && clientRepo.count() > 0) {
             return;
         }
 
@@ -68,6 +71,16 @@ public class DataInitializer {
         PymeEntity pyme3 = createPyme("Casa Bonita", "pymetesting325@yopmail.com", "Alajuela", "8888-3333", "Decoración para el hogar", null);
 
         pymeRepo.saveAll(List.of(pyme1, pyme2, pyme3));
+
+        // --- Crear Clientes Anónimos ---
+        ClientEntity anonClient1 = new ClientEntity();
+        anonClient1.setExpiresAt(LocalDateTime.now().plusDays(30));
+
+        ClientEntity anonClient2 = new ClientEntity();
+        anonClient2.setExpiresAt(LocalDateTime.now().plusDays(30));
+
+        clientRepo.saveAll(List.of(anonClient1, anonClient2));
+
 
         // --- Crear Productos ---
         ProductEntity prod1 = createProduct("Audífonos Bluetooth", "Inalámbricos con cancelación de ruido", new BigDecimal("25000"), 10, tech, pyme1, new BigDecimal("0.90"));

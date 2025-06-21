@@ -69,6 +69,7 @@ public class CreateOrderTest {
 
         CreateOrderHandler.Command command = new CreateOrderHandler.Command(
                 UUID.randomUUID(), // usuario anónimo
+                "CLIENT",
                 "alvarosiles499@gmail.com",
                 "Ana",
                 "Pérez",
@@ -104,6 +105,7 @@ public class CreateOrderTest {
         CreateOrderHandler.Command command = new CreateOrderHandler.Command(
                 UUID.randomUUID(), // usuario anónimo
                 "client@example.com",
+                "CLIENT",
                 "Ana",
                 "Pérez",
                 "1234-0000",
@@ -131,6 +133,7 @@ public class CreateOrderTest {
 
         CreateOrderHandler.Command command = new CreateOrderHandler.Command(
                 UUID.randomUUID(), // usuario anónimo
+                "CLIENT",
                 "client@example.com",
                 "Ana",
                 "Pérez",
@@ -156,6 +159,7 @@ public class CreateOrderTest {
 
         CreateOrderHandler.Command command = new CreateOrderHandler.Command(
                 UUID.randomUUID(), // usuario anónimo
+                "USER",
                 "client@example.com",
                 "Ana",
                 "Pérez",
@@ -189,6 +193,7 @@ public class CreateOrderTest {
 
         CreateOrderHandler.Command command = new CreateOrderHandler.Command(
                 UUID.randomUUID(), // usuario anónimo
+                "USER",
                 "client@example.com",
                 "Ana",
                 "Pérez",
@@ -249,6 +254,7 @@ public class CreateOrderTest {
 
         CreateOrderHandler.Command command = new CreateOrderHandler.Command(
                 UUID.randomUUID(),
+                "USER",
                 "client@example.com",
                 "Ana",
                 "Pérez",
@@ -332,6 +338,7 @@ public class CreateOrderTest {
 
         CreateOrderHandler.Command command = new CreateOrderHandler.Command(
                 UUID.randomUUID(),
+                "USER",
                 "promo@test.com",
                 "Laura", "Promo",
                 "1111-2222",
@@ -393,6 +400,7 @@ public class CreateOrderTest {
 
         CreateOrderHandler.Command command = new CreateOrderHandler.Command(
                 UUID.randomUUID(),
+                "USER",
                 "client@example.com",
                 "Ana",
                 "Pérez",
@@ -442,6 +450,7 @@ public class CreateOrderTest {
 
         CreateOrderHandler.Command command = new CreateOrderHandler.Command(
                 UUID.randomUUID(),
+                "USER",
                 "cliente@rollback.com",
                 "Juan", "Tester",
                 "9999-0000",

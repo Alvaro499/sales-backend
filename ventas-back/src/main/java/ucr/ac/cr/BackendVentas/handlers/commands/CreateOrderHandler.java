@@ -17,16 +17,17 @@ public interface CreateOrderHandler {
     }
 
     record Command(
-        // puede ser userId real o guestUserId
-        UUID userId,
-        String email,
-        String firstName,
-        String lastName,
-        String phone,
-        String shippingAddress,
-        String paymentMethod,
-        String shippingMethod,
-        List<OrderProduct> products
+            // puede ser userId real o guestUserId
+            UUID userId,
+            String buyerType, // nuevo
+            String email,
+            String firstName,
+            String lastName,
+            String phone,
+            String shippingAddress,
+            String paymentMethod,
+            String shippingMethod,
+            List<OrderProduct> products
     ) {}
 }
 

@@ -27,7 +27,8 @@ public class CreateOrderController {
         UUID tempUserId = request.guestUserId() != null ? request.guestUserId() : UUID.randomUUID();
 
         var command = new CreateOrderHandler.Command(
-                tempUserId,
+                request.guestUserId(),
+                request.buyerType(),
                 request.email(),
                 request.firstName(),
                 request.lastName(),
