@@ -110,11 +110,28 @@ public class ProductHandlerImpl implements ProductHandler {
         }
 
         ProductEntity product = productOptional.get();
-        product.setPromotion(new BigDecimal(command.promotion()));  // Apply the promotion
+        BigDecimal newPromo;
+
+        try {
+            newPromo = new BigDecimal(command.promotion());
+        } catch (NumberFormatException e) {
+            return new Result.PromotionInvalid("Promotion must be a valid number.");
+        }
+
+        if (newPromo.compareTo(BigDecimal.ZERO) <= 0) {
+            return new Result.PromotionInvalid("Promotion must be greater than 0.");
+        }
+
+        if (newPromo.compareTo(product.getPrice()) >= 0) {
+            return new Result.PromotionInvalid("Promotion must be less than the original price.");
+        }
+
+        product.setPromotion(newPromo);
         productRepository.save(product);
 
         return new Result.Success(product);
     }
+
 
     public Result changeAvailabilityAndStock(ChangeAvailabilityAndStockCommand command) {
         Optional<ProductEntity> productOptional = productRepository.findById(command.productId());

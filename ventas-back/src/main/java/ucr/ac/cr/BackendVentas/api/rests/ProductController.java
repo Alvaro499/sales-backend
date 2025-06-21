@@ -184,6 +184,24 @@ public class ProductController {
 
 
 
+    @PutMapping("/promotion/{productId}")
+    public Response applyPromotion(@PathVariable UUID productId, @RequestBody Map<String, String> request) {
+        String promotion = request.get("promotion");
+
+        var command = new ProductHandler.ApplyPromotionCommand(productId, promotion);
+        var result = productHandler.applyPromotion(command);
+
+        if (result instanceof ProductHandler.Result.Success success) {
+            return new Response("Promotion applied successfully", success.product());
+        } else if (result instanceof ProductHandler.Result.NotFoundProduct) {
+            throw BaseException.exceptionBuilder()
+                    .code(ErrorCode.PRODUCT_NOT_FOUND)
+                    .message("Product not found")
+                    .build();
+        } else {
+            throw new IllegalStateException("Unexpected result: " + result);
+        }
+    }
 
 
 
