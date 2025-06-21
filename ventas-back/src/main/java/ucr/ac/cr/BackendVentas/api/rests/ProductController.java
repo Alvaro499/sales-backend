@@ -154,7 +154,7 @@ public class ProductController {
         }
     }
 
-
+  
     @GetMapping("/search")
     public Response searchProducts(
             @RequestParam(required = false) String term,
@@ -181,11 +181,5 @@ public class ProductController {
         }
 
     }
-
-
-
-
-
-
 
 }
