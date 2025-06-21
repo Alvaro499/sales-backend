@@ -3,6 +3,7 @@ package ucr.ac.cr.BackendVentas.handlers.commands.Impl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ucr.ac.cr.BackendVentas.api.types.enums.OrderStatus;
+import ucr.ac.cr.BackendVentas.events.PurchaseSummaryMessage;
 import ucr.ac.cr.BackendVentas.handlers.commands.CreateOrderHandler;
 import ucr.ac.cr.BackendVentas.handlers.commands.OrderLineHandler;
 import ucr.ac.cr.BackendVentas.handlers.queries.OrderQuery;
@@ -13,10 +14,14 @@ import ucr.ac.cr.BackendVentas.jpa.entities.*;
 import ucr.ac.cr.BackendVentas.models.ErrorCode;
 import ucr.ac.cr.BackendVentas.models.OrderProduct;
 import ucr.ac.cr.BackendVentas.handlers.validators.OrderValidator;
+import ucr.ac.cr.BackendVentas.producers.PurchaseSummaryProducer;
+import ucr.ac.cr.BackendVentas.service.PurchaseSummaryAssembler;
+import ucr.ac.cr.BackendVentas.utils.MonetaryUtils;
 import ucr.ac.cr.BackendVentas.utils.ValidationUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static ucr.ac.cr.BackendVentas.utils.ValidationUtils.validationError;
 
@@ -29,13 +34,15 @@ public class CreateOrderHandlerImpl implements CreateOrderHandler {
     private final OrderValidator orderValidator;
     private final PaymentMethodQuery paymentMethodQuery;
     private final ShippingMethodQuery shippingMethodQuery;
+    private final PurchaseSummaryProducer purchaseSummaryProducer;
 
     public CreateOrderHandlerImpl(OrderQuery orderQuery,
                                   ProductQuery productQuery,
                                   OrderLineHandler orderLineHandler,
                                   OrderValidator orderValidator,
                                   PaymentMethodQuery paymentMethodQuery,
-                                  ShippingMethodQuery shippingMethodQuery) {
+                                  ShippingMethodQuery shippingMethodQuery,
+                                  PurchaseSummaryProducer purchaseSummaryProducer) {
 
         this.orderQuery = orderQuery;
         this.productQuery = productQuery;
@@ -43,6 +50,7 @@ public class CreateOrderHandlerImpl implements CreateOrderHandler {
         this.orderValidator = orderValidator;
         this.paymentMethodQuery = paymentMethodQuery;
         this.shippingMethodQuery = shippingMethodQuery;
+        this.purchaseSummaryProducer = purchaseSummaryProducer;
     }
 
     @Transactional
@@ -50,11 +58,22 @@ public class CreateOrderHandlerImpl implements CreateOrderHandler {
     public Result handle(Command command) {
 
         Map<PymeEntity, List<OrderProduct>> productsByPyme = groupProductsByPyme(command.products());
-
         validateAll(command, productsByPyme);
-
         List<OrderEntity> orders = createOrders(command, productsByPyme);
 
+        //Recolectar los datos creados durante la creación de órdenes para enviar
+        //el mensaje de resumen de compra por email
+        Map<UUID, PymeEntity> pymesMap = productsByPyme.keySet().stream()
+                .collect(Collectors.toMap(PymeEntity::getId, p -> p));
+
+        PurchaseSummaryMessage message = PurchaseSummaryAssembler.toMessage(
+                command,
+                orders,
+                pymesMap
+        );
+
+        purchaseSummaryProducer.sendEmailSummary(message);
+        //Se retornan los IDs de las órdenes creadas
         return new Result.Success(orders.stream().map(OrderEntity::getId).toList());
     }
 
@@ -91,11 +110,11 @@ public class CreateOrderHandlerImpl implements CreateOrderHandler {
             newOrder.setTotalAmount(calculateOrderTotalAmount(products));
 
             Optional<OrderEntity> savedOrder = orderQuery.save(newOrder);
-            orderLineHandler.createOrderLines(savedOrder.get(), products);
+            List<OrderLineEntity> associatedLines = orderLineHandler.createOrderLines(savedOrder.get(), products);
+            savedOrder.get().setOrderLines(associatedLines);
 
-            orders.add(newOrder);
+            orders.add(savedOrder.get());
         }
-
         return orders;
     }
 
@@ -107,9 +126,8 @@ public class CreateOrderHandlerImpl implements CreateOrderHandler {
             int quantity = orderProduct.quantity();
 
             ProductEntity product = productQuery.findById(productId).orElseThrow();
-            BigDecimal price = product.getPrice();
-
-            total = total.add(price.multiply(BigDecimal.valueOf(quantity)));
+            BigDecimal finalPrice = MonetaryUtils.applyPromotion(product.getPrice(), product.getPromotion());
+            total = total.add(finalPrice.multiply(BigDecimal.valueOf(quantity)));
         }
 
         return total;

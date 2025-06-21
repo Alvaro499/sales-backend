@@ -75,7 +75,7 @@
 <div class="outer-banner">
     <div class="container">
         <h2>¡Gracias por tu compra!</h2>
-        <p>Hola <strong th:text="${firstName} + ' ' + ${lastName}">Juan Pérez</strong>, hemos recibido tu pedido correctamente.</p>
+        <p>Hola <strong th:text="${firstName + ' ' + lastName}">Juan Pérez</strong>, hemos recibido tu pedido correctamente.</p>
 
         <h3>Resumen del pedido:</h3>
         <div class="info-box">
@@ -88,12 +88,18 @@
 
         <div th:each="order : ${orders}" class="order-section">
             <h4 th:text="'Orden - ' + ${order.pymeName}">Orden - Tech CR</h4>
+
+            <p th:if="${#lists.isEmpty(order.products)}">No hay productos en esta orden</p>
+            <p th:unless="${#lists.isEmpty(order.products)}">Productos cargados correctamente</p>
+
             <table class="product-table">
                 <thead>
                 <tr>
                     <th>Producto</th>
                     <th>Cantidad</th>
                     <th>Precio Unitario</th>
+                    <th>Descuento</th>
+                    <th>Precio con Descuento</th>
                     <th>Subtotal</th>
                 </tr>
                 </thead>
@@ -101,16 +107,24 @@
                 <tr th:each="product : ${order.products}">
                     <td th:text="${product.name}">Teclado Mecánico</td>
                     <td th:text="${product.quantity}">1</td>
-                    <td th:text="${product.unitPrice}">₡25,000</td>
-                    <td th:text="${product.subtotal}">₡25,000</td>
+                    <td><span>₡</span><span th:text="${product.unitPrice}">25000.00</span></td>
+                    <td th:text="${product.promotionApplied}">0.00</td>
+                    <td><span>₡</span><span th:text="${product.priceWithDiscount}">25000.00</span></td>
+                    <td><span>₡</span><span th:text="${product.subtotal}">25000.00</span></td>
                 </tr>
                 </tbody>
             </table>
-            <p><strong>Total de esta orden:</strong> <span th:text="${order.total}">₡25,000</span></p>
+
+            <p><strong>Total de esta orden:</strong>
+                <span>₡</span><span th:text="${order.total}">25000.00</span>
+            </p>
         </div>
 
         <hr style="margin-top: 30px;">
-        <p><strong>Total general de tu compra:</strong> <span th:text="${grandTotal}">₡33,000</span></p>
+
+        <p><strong>Total general de tu compra:</strong>
+            <span>₡</span><span th:text="${grandTotal}">33000.00</span>
+        </p>
 
         <p>Recibirás actualizaciones por correo electrónico de cada pyme cuando tu pedido esté listo o en camino.</p>
 
@@ -122,27 +136,6 @@
     </div>
 </div>
 
+
 </body>
 </html>
-
-
-<!--
-
-Variables Thymeleaf esperadas:
-Campo	Descripción
-${firstName} / ${lastName}	Nombre del cliente
-${email} / ${phone}	Contacto del cliente
-${shippingAddress}	Dirección de envío
-${shippingMethod}	Método de envío elegido
-${paymentMethod}	Forma de pago seleccionada
-${orders}	Lista de órdenes individuales por pyme
-${order.pymeName}	Nombre de la pyme correspondiente
-${order.products}	Productos de esa pyme
-${product.name}	Nombre del producto
-${product.quantity}	Cantidad
-${product.unitPrice}	Precio unitario
-${product.subtotal}	Subtotal del producto
-${order.total}	Total por orden (por pyme)
-${grandTotal}	Total de toda la compra
-
--->

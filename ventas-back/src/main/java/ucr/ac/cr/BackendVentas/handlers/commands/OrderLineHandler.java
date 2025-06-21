@@ -9,5 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 public interface OrderLineHandler {
-    void createOrderLines(OrderEntity order, List<OrderProduct> productsByOrder);
+    //void createOrderLines(OrderEntity order, List<OrderProduct> productsByOrder);
+    List<OrderLineEntity> createOrderLines(OrderEntity order, List<OrderProduct> productsByOrder);
 }

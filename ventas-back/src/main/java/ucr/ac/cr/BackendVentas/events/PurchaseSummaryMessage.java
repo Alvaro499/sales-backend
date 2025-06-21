@@ -1,4 +1,4 @@
-package ucr.ac.cr.email_service.events;
+package ucr.ac.cr.BackendVentas.events;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -31,3 +31,4 @@ public record PurchaseSummaryMessage(
             BigDecimal  subtotal
     ) {}
 }
+

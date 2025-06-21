@@ -11,4 +11,5 @@ public class ErrorCode {
     public static final String ENTITY_NOT_FOUND = "ENTITY_NOT_FOUND";
     public static final String ALREADY_VERIFIED = "ALREADY_VERIFIED";
     public static final String INVALID_CONFIRMATION_CODE = "INVALID_CONFIRMATION_CODE";
+    public static final String UNEXPECTED_ERROR = "UNEXPECTED_ERROR";
 }

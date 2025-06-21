@@ -7,13 +7,17 @@ import org.springframework.stereotype.Component;
 import ucr.ac.cr.email_service.consumer.PurchaseSummaryListener;
 import ucr.ac.cr.email_service.events.PurchaseSummaryMessage;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Component
 public class PurchaseEmailTest implements CommandLineRunner {
 
-    @Autowired
-    private PurchaseSummaryListener listener;
+    private final PurchaseSummaryListener listener;
+
+    public PurchaseEmailTest(PurchaseSummaryListener listener) {
+        this.listener = listener;
+    }
 
     @Override
     public void run(String... args) {
@@ -22,8 +26,20 @@ public class PurchaseEmailTest implements CommandLineRunner {
         /*
         try {
             List<PurchaseSummaryMessage.Product> products = List.of(
-                    new PurchaseSummaryMessage.Product("Café Premium", 2, "3500", "7000"),
-                    new PurchaseSummaryMessage.Product("Pan Casero", 1, "1500", "1500")
+                    new PurchaseSummaryMessage.Product(
+                            "Café Premium", 2,
+                            new BigDecimal("3500"),
+                            new BigDecimal("7000"),
+                            new BigDecimal("0.0"),  // o el porcentaje real
+                            new BigDecimal("7000")
+                    ),
+                    new PurchaseSummaryMessage.Product(
+                            "Pan Casero", 1,
+                            new BigDecimal("1500"),
+                            new BigDecimal("1500"),
+                            new BigDecimal("0.0"),
+                            new BigDecimal("1500")
+                    )
             );
 
             PurchaseSummaryMessage msg = getPurchaseSummaryMessage(products);
@@ -36,12 +52,17 @@ public class PurchaseEmailTest implements CommandLineRunner {
         } catch (Exception e) {
             e.printStackTrace();
         }
-         */
+        */
     }
 
     private static PurchaseSummaryMessage getPurchaseSummaryMessage(List<PurchaseSummaryMessage.Product> products) {
         List<PurchaseSummaryMessage.PymeOrder> orders = List.of(
-                new PurchaseSummaryMessage.PymeOrder("aldasi2000@hotmail.com", "Delicias Ticas", "8500", products)
+                new PurchaseSummaryMessage.PymeOrder(
+                        "aldasi2000@hotmail.com",
+                        "Delicias Ticas",
+                        new BigDecimal("8500"),
+                        products
+                )
         );
 
         return new PurchaseSummaryMessage(
@@ -52,7 +73,7 @@ public class PurchaseEmailTest implements CommandLineRunner {
                 "San José, Costa Rica",
                 "Correo Rápido",
                 "Sinpe Móvil",
-                "8500",
+                new BigDecimal("8500"),
                 orders
         );
     }

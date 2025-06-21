@@ -139,7 +139,7 @@ public class ProductEntity {
         this.stock = stock;
     }
 
-    public List<String> getUrlImg(List<String> images) {
+    public List<String> getUrlImg() {
         return urlImg;
     }
 

@@ -13,6 +13,7 @@ import ucr.ac.cr.BackendVentas.utils.MonetaryUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.List;
 
 import static ucr.ac.cr.BackendVentas.utils.ValidationUtils.validationError;
@@ -29,59 +30,51 @@ public class OrderLineHandlerImpl implements OrderLineHandler {
     }
 
     //Aqui usamos OrderProduct (que debería llamarse OrderedProducts)
+
     @Override
-    public void createOrderLines(OrderEntity order, List<OrderProduct> productsByOrder) {
+    public List<OrderLineEntity> createOrderLines(OrderEntity order, List<OrderProduct> productsByOrder) {
+        List<OrderLineEntity> lines = new ArrayList<>();
+
         for (OrderProduct product : productsByOrder) {
-            OrderLineEntity line = new OrderLineEntity();
-            line.setOrder(order);
-
-            ProductEntity productEntity = productRepository.findById(product.productId())
-                    .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado"));
-
-
-            //BigDecimal unitPrice = applyPromotion(productEntity);
-            //BigDecimal subtotal = MonetaryUtils.round(
-                    //unitPrice.multiply(BigDecimal.valueOf(product.quantity()))
-            //);
-
-            line.setProduct(productEntity);
-            line.setQuantity(product.quantity());
-            line.setUnitPrice(productEntity.getPrice());
-            line.setSubtotal(productEntity.getPrice().multiply(
-                    BigDecimal.valueOf(product.quantity())
-            ));
-            orderLineQuery.save(line);
+            OrderLineEntity line = buildOrderLine(order, product);
+            OrderLineEntity savedLine = saveOrderLine(line);
+            lines.add(savedLine);
         }
+
+        return lines;
     }
 
-    /**
-     * La promoción se maneja entre valores de 0 y 1, donde 0 es sin descuento y 0.9
-     * es un descuento del 90%.
-     * La fórmula es: finalPrice = price × (1 - promotion)
-     * Si la promoción es 0.20 → discountFactor = 1 - 0.20 = 0.80
-     */
+    private OrderLineEntity buildOrderLine(OrderEntity order, OrderProduct product) {
+        ProductEntity productEntity = productRepository.findById(product.productId())
+                .orElseThrow(() -> validationError(
+                        "Producto no encontrado: " + product.productId(),
+                        ErrorCode.ENTITY_NOT_FOUND,
+                        "product"
+                ));
 
-    private BigDecimal applyPromotion(ProductEntity product) {
-        BigDecimal price = product.getPrice();
-        BigDecimal promotion = product.getPromotion();
+        BigDecimal originalPrice = productEntity.getPrice();
+        BigDecimal promotion = productEntity.getPromotion() != null ? productEntity.getPromotion() : BigDecimal.ZERO;
+        BigDecimal priceWithDiscount = MonetaryUtils.applyPromotion(originalPrice, promotion);
+        BigDecimal subtotal = priceWithDiscount.multiply(BigDecimal.valueOf(product.quantity()));
 
-        if (promotion == null) promotion = BigDecimal.ZERO;
+        OrderLineEntity line = new OrderLineEntity();
+        line.setOrder(order);
+        line.setProduct(productEntity);
+        line.setQuantity(product.quantity());
+        line.setUnitPrice(originalPrice);
+        line.setPromotionApplied(promotion);
+        line.setPriceWithDiscount(priceWithDiscount);
+        line.setSubtotal(subtotal);
 
-        boolean isNegativePromotion = promotion.compareTo(BigDecimal.ZERO) < 0;
-        boolean isOverNinetyPercent = promotion.compareTo(new BigDecimal("0.90")) > 0;
+        return line;
+    }
 
-        if (isNegativePromotion || isOverNinetyPercent) {
-            throw validationError(
-                    "Promoción inválida para el producto: " + product.getId(),
-                    ErrorCode.INVALID_FORMAT,
-                    "promotion"
-            );
-        }
-        BigDecimal discountFactor = BigDecimal.ONE.subtract(promotion);
-        BigDecimal finalPrice = price.multiply(discountFactor);
-
-        //Redondeo seguro a 2 decimales
-        return MonetaryUtils.round(finalPrice);
+    private OrderLineEntity saveOrderLine(OrderLineEntity line) {
+        return orderLineQuery.save(line).orElseThrow(() -> validationError(
+                "No se pudo guardar la línea de orden",
+                ErrorCode.UNEXPECTED_ERROR,
+                "orderLine"
+        ));
     }
 
 }

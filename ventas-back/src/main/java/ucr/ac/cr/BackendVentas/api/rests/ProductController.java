@@ -2,12 +2,17 @@ package ucr.ac.cr.BackendVentas.api.rests;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ucr.ac.cr.BackendVentas.api.mappers.ProductMapper;
 import ucr.ac.cr.BackendVentas.handlers.commands.ProductHandler;
+import ucr.ac.cr.BackendVentas.jpa.entities.ProductEntity;
+import ucr.ac.cr.BackendVentas.jpa.repositories.ProductRepository;
 import ucr.ac.cr.BackendVentas.models.BaseException;
 import ucr.ac.cr.BackendVentas.models.ErrorCode;
 import ucr.ac.cr.BackendVentas.api.types.ProductRequest;
 import ucr.ac.cr.BackendVentas.api.types.Response;
+import ucr.ac.cr.BackendVentas.api.types.ProductDTO;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -17,10 +22,12 @@ import java.util.UUID;
 public class ProductController {
 
     private final ProductHandler productHandler;
+    private final ProductRepository productRepository;
 
     @Autowired
-    public ProductController(ProductHandler productHandler) {
+    public ProductController(ProductHandler productHandler, ProductRepository productRepository) {
         this.productHandler = productHandler;
+        this.productRepository = productRepository;
     }
 
     @PostMapping
@@ -58,6 +65,22 @@ public class ProductController {
 
             default -> throw new IllegalStateException("Unexpected result: " + result);
         };
+    }
+
+    @GetMapping("/info/{productID}")
+    public Response listProductsInfo(@PathVariable UUID productID) {
+        // Buscar el producto en la base de datos usando el productID
+        ProductEntity product = productRepository.findById(productID)
+                .orElseThrow(() -> BaseException.exceptionBuilder()
+                        .code(ErrorCode.PRODUCT_NOT_FOUND)
+                        .message("Product not found")
+                        .build());
+
+        // Mapear el producto a un DTO (opcional, si estás usando DTOs)
+        ProductDTO productDTO = ProductMapper.toDTO(product);
+
+        // Retornar la respuesta con el producto
+        return new Response("Product retrieved", productDTO);
     }
 
 
@@ -129,6 +152,34 @@ public class ProductController {
         } else {
             throw new IllegalStateException("Unexpected result: " + result);
         }
+    }
+
+  
+    @GetMapping("/search")
+    public Response searchProducts(
+            @RequestParam(required = false) String term,
+            @RequestParam(required = false) Integer categoryId,
+            @RequestParam(required = false) BigDecimal priceMin,
+            @RequestParam(required = false) BigDecimal priceMax
+    ) {
+        ProductHandler.Result result;
+
+        if (term == null && categoryId == null && priceMin == null && priceMax == null) {
+            result = productHandler.listAllProducts();
+        } else {
+            result = productHandler.searchProducts(term, categoryId, priceMin, priceMax);
+        }
+
+        if (result instanceof ProductHandler.Result.SuccessList(
+                List<ucr.ac.cr.BackendVentas.jpa.entities.ProductEntity> products
+        )) {
+            List<ProductDTO> dtoList = ProductMapper.toDTOList(products);
+
+            return new Response("Products retrieved", dtoList);
+        } else {
+            return new Response("No products found", List.of());
+        }
+
     }
 
 }

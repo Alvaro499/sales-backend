@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp; 
@@ -50,6 +51,17 @@ public class OrderEntity {
 
     @Column(name = "shipping_address", length = 255, nullable = false)
     private String shippingAddress;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<OrderLineEntity> orderLines;
+
+    public List<OrderLineEntity> getOrderLines() {
+        return orderLines;
+    }
+
+    public void setOrderLines(List<OrderLineEntity> orderLines) {
+        this.orderLines = orderLines;
+    }
 
     public UUID getId() {
         return id;

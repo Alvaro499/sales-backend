@@ -3,6 +3,7 @@ package ucr.ac.cr.BackendVentas.jpa.entities;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 import org.hibernate.annotations.GenericGenerator;
@@ -34,6 +35,12 @@ public class OrderLineEntity {
 
     @Column(name = "subtotal", nullable = false)
     private BigDecimal subtotal;
+
+    @Column(name = "promotion_applied", nullable = false)
+    private BigDecimal promotionApplied;
+
+    @Column(name = "price_with_discount", nullable = false)
+    private BigDecimal priceWithDiscount;
 
     // Getters y Setters
     public UUID getId() {
@@ -84,4 +91,11 @@ public class OrderLineEntity {
         this.subtotal = subtotal;
     }
 
+    public BigDecimal getPromotionApplied() {return promotionApplied;}
+
+    public void setPromotionApplied(BigDecimal promotionApplied) {this.promotionApplied = promotionApplied;}
+
+    public BigDecimal getPriceWithDiscount() {return priceWithDiscount;}
+
+    public void setPriceWithDiscount(BigDecimal priceWithDiscount) {this.priceWithDiscount = priceWithDiscount;}
 }
