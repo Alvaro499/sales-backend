@@ -23,7 +23,6 @@ public class RegisterPymeController {
     private PymeRepository pymeRepository;
 
     @PostMapping("/register")
-    @CrossOrigin(origins = "http://localhost:5173")
     public ResponseEntity<?> registerPyme(@RequestBody RegisterPymeRequest request) {
         var command = new RegisterPymeHandler.Command(
                 request.userId(),
