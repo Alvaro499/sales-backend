@@ -13,5 +13,6 @@ public interface ProductRepository extends JpaRepository<ProductEntity, UUID>, J
     Optional<ProductEntity> findById(UUID uuid);
     List<ProductEntity> findByPyme(PymeEntity pyme);
     Optional<ProductEntity> findByName(String name);
+    long countByIsActiveTrue();
 
 }
