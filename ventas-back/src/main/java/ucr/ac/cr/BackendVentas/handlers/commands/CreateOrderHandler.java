@@ -10,7 +10,7 @@ public interface CreateOrderHandler {
     Result handle(Command command);
 
     sealed interface Result permits Result.Success, Result.InvalidFields, Result.OutOfStock, Result.NotFound {
-        record Success(List<UUID> orderIds) implements Result {}
+        record Success(List<UUID> orderIds, UUID userId) implements Result {}
         record InvalidFields(String msg ,String... fields) implements Result {}
         record OutOfStock(UUID productId, int requestedQuantity, int availableStock) implements Result {}
         record NotFound(String message) implements Result {}

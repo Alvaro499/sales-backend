@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ucr.ac.cr.BackendVentas.api.types.CreateOrderRequest;
+import ucr.ac.cr.BackendVentas.api.types.CreateOrderResponse;
 import ucr.ac.cr.BackendVentas.handlers.commands.CreateOrderHandler;
 
 @RestController
@@ -21,10 +22,8 @@ public class CreateOrderController {
         this.createOrderHandler = createOrderHandler;
     }
 
-    // Endpoint temporal sin autenticación
     @PostMapping("")
     public ResponseEntity<?> createOrderTemp(@RequestBody CreateOrderRequest request) {
-        UUID tempUserId = request.guestUserId() != null ? request.guestUserId() : UUID.randomUUID();
 
         var command = new CreateOrderHandler.Command(
                 request.guestUserId(),
@@ -39,8 +38,10 @@ public class CreateOrderController {
                 request.products()
         );
         // Solo devuelve Success, los errores se manejan por @ControllerAdvice
-        var success = createOrderHandler.handle(command);
-        return ResponseEntity.ok(success);
+        var result = (CreateOrderHandler.Result.Success) createOrderHandler.handle(command);
+
+        var response = new CreateOrderResponse(result.userId(), result.orderIds());
+        return ResponseEntity.ok(response);
     }
 
 }

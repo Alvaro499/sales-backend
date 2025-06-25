@@ -32,6 +32,7 @@ public class CreateClientHandlerImpl implements CreateClientHandler {
 
         // Si vino un ID, pero no existe, NO lo usamos
         // Creamos uno nuevo con ID generado automáticamente
+        //Se evita "Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect)"
         ClientEntity newClient = new ClientEntity();
         newClient.setExpiresAt(LocalDateTime.now().plusDays(30));
         return clientRepo.save(newClient).getId();

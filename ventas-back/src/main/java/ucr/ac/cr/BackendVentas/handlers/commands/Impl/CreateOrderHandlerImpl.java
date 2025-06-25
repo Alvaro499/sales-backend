@@ -79,8 +79,13 @@ public class CreateOrderHandlerImpl implements CreateOrderHandler {
         );
 
         purchaseSummaryProducer.sendEmailSummary(message);
+
         //Se retornan los IDs de las órdenes creadas
-        return new Result.Success(orders.stream().map(OrderEntity::getId).toList());
+        List<UUID> orderIds = orders.stream()
+                .map(OrderEntity::getId)
+                .toList();
+        return new Result.Success(orderIds, finalCommand.userId());
+
     }
 
     private void validateAll(Command command, Map<PymeEntity, List<OrderProduct>> productsByPyme) {
