@@ -19,6 +19,10 @@ public interface ProductHandler {
     Result searchProducts(String term, Integer categoryId, BigDecimal priceMin, BigDecimal priceMax);
 
     Result listAllProducts();
+
+    Result applyPromotion(ApplyPromotionCommand command);
+
+
     // Command for creating a product
     record Command(String name, String description, BigDecimal price, List<String> category, List<String> images,
                    Boolean available, String promotion, Integer stock, UUID pymeId) {}
@@ -36,12 +40,13 @@ public interface ProductHandler {
     record ListProductsByPymeCommand(UUID pymeId) {}
 
 
-    sealed interface Result permits Result.Success, Result.InvalidFields, Result.PymeNotFound, Result.NotFoundProduct, Result.SuccessList {
+    sealed interface Result permits Result.Success, Result.InvalidFields, Result.PymeNotFound, Result.NotFoundProduct, Result.SuccessList, Result.PromotionInvalid {
         record Success(ProductEntity product) implements Result {}
         record SuccessList(List<ProductEntity> products) implements Result {}
         record InvalidFields(String... fields) implements Result {}
         record PymeNotFound() implements Result {}
         record NotFoundProduct() implements Result {}  // New result for product not found
+        record PromotionInvalid(String... fields) implements Result{}
     }
 
 
