@@ -120,22 +120,25 @@ public class OrderValidator {
             throw validationError("El tipo de comprador es obligatorio", ErrorCode.REQUIRED_FIELDS, "buyerType");
         }
 
-        if (buyerId == null) {
-            throw validationError("El ID del comprador es obligatorio", ErrorCode.REQUIRED_FIELDS, "userId");
-        }
-
         String type = buyerType.toUpperCase();
 
         if (!type.equals("CLIENT") && !type.equals("USER")) {
             throw validationError("El tipo de comprador debe ser 'USER' o 'CLIENT'", ErrorCode.INVALID_FORMAT, "buyerType");
         }
 
+        if (type.equals("USER")) {
+            if (buyerId == null) {
+                throw validationError("El ID del usuario es obligatorio", ErrorCode.REQUIRED_FIELDS, "userId");
+            }
+        }
+
         if (type.equals("CLIENT")) {
-            boolean exists = clientQuery.findById(buyerId).isPresent();
-            if (!exists) {
+            // buyerId puede ser null para anónimos
+            if (buyerId != null && clientQuery.findById(buyerId).isEmpty()) {
                 throw validationError("Cliente no encontrado con el ID dado", ErrorCode.ENTITY_NOT_FOUND, "userId");
             }
         }
     }
+
 
 }
