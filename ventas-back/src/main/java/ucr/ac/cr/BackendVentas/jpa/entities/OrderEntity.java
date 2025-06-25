@@ -27,6 +27,10 @@ public class OrderEntity {
     private UUID user;
 
     @ManyToOne
+    @JoinColumn(name = "client_id", referencedColumnName = "client_id", nullable = true)
+    private ClientEntity client;
+
+    @ManyToOne
     @JoinColumn(name = "pyme_id", referencedColumnName = "pyme_id", nullable = false)
     private PymeEntity pyme;
 
@@ -133,6 +137,14 @@ public class OrderEntity {
 
     public void setShippingAddress(String shippingAddress) {
         this.shippingAddress = shippingAddress;
+    }
+
+    public ClientEntity getClient() {
+        return client;
+    }
+
+    public void setClient(ClientEntity client) {
+        this.client = client;
     }
 
 }

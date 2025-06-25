@@ -1,18 +1,12 @@
 package ucr.ac.cr.BackendVentas.handlers.validators;
 
 import org.springframework.stereotype.Component;
-import ucr.ac.cr.BackendVentas.handlers.queries.PaymentMethodQuery;
-import ucr.ac.cr.BackendVentas.handlers.queries.PymeQuery;
-import ucr.ac.cr.BackendVentas.handlers.queries.ProductQuery;
-import ucr.ac.cr.BackendVentas.handlers.queries.ShippingMethodQuery;
+import ucr.ac.cr.BackendVentas.handlers.queries.*;
 import ucr.ac.cr.BackendVentas.models.OrderProduct;
 import ucr.ac.cr.BackendVentas.models.ErrorCode;
 import ucr.ac.cr.BackendVentas.jpa.entities.*;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static ucr.ac.cr.BackendVentas.utils.ValidationUtils.validationError;
 
@@ -24,14 +18,16 @@ public class OrderValidator {
     private final PaymentMethodQuery paymentMethodQuery;
     private final ShippingMethodQuery shippingMethodQuery;
     private final OrderLineValidator orderLineValidator;
+    private final ClientQuery clientQuery;
 
     public OrderValidator(ProductQuery productQuery, PymeQuery pymeQuery,
-                          PaymentMethodQuery paymentMethodQuery, ShippingMethodQuery shippingMethodQuery, OrderLineValidator orderLineValidator) {
+                          PaymentMethodQuery paymentMethodQuery, ShippingMethodQuery shippingMethodQuery, OrderLineValidator orderLineValidator, ClientQuery clientQuery) {
         this.productQuery = productQuery;
         this.pymeQuery = pymeQuery;
         this.paymentMethodQuery = paymentMethodQuery;
         this.shippingMethodQuery = shippingMethodQuery;
         this.orderLineValidator = orderLineValidator;
+        this.clientQuery = clientQuery;
     }
 
 
@@ -118,4 +114,28 @@ public class OrderValidator {
             }
         }
     }
+
+    public void validateBuyer(String buyerType, UUID buyerId) {
+        if (buyerType == null || buyerType.isBlank()) {
+            throw validationError("El tipo de comprador es obligatorio", ErrorCode.REQUIRED_FIELDS, "buyerType");
+        }
+
+        if (buyerId == null) {
+            throw validationError("El ID del comprador es obligatorio", ErrorCode.REQUIRED_FIELDS, "userId");
+        }
+
+        String type = buyerType.toUpperCase();
+
+        if (!type.equals("CLIENT") && !type.equals("USER")) {
+            throw validationError("El tipo de comprador debe ser 'USER' o 'CLIENT'", ErrorCode.INVALID_FORMAT, "buyerType");
+        }
+
+        if (type.equals("CLIENT")) {
+            boolean exists = clientQuery.findById(buyerId).isPresent();
+            if (!exists) {
+                throw validationError("Cliente no encontrado con el ID dado", ErrorCode.ENTITY_NOT_FOUND, "userId");
+            }
+        }
+    }
+
 }
