@@ -49,4 +49,10 @@ public class ActivatePymeCodeController {
             }
         };
     }
+
+    @GetMapping
+    public ResponseEntity<?> listAllPymes() {
+        var pymes = pymeRepository.findAll();
+        return ResponseEntity.ok(pymes);
+    }
 }
