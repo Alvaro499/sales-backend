@@ -2,17 +2,26 @@ server:
   port: 8083
 
 spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5433/authdb
-    driver-class-name: org.postgresql.Driver
-    username: authuser
-    password: authpass
-    hikari:
-      maximum-pool-size: 10
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: auth-service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: earliest
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
 eureka:
   client:
     registerWithEureka: true
+    fetchRegistry: true
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/
   instance:

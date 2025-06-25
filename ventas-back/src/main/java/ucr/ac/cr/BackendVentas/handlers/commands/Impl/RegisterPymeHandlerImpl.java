@@ -3,25 +3,30 @@ package ucr.ac.cr.BackendVentas.handlers.commands.Impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import ucr.ac.cr.BackendVentas.events.PymeRegisteredEvent;
+import ucr.ac.cr.BackendVentas.events.SendUserPymeIdEvent;
 import ucr.ac.cr.BackendVentas.handlers.commands.CreatePymeConfirmationCodeHandler;
 import ucr.ac.cr.BackendVentas.jpa.repositories.PymeRepository;
 import ucr.ac.cr.BackendVentas.producers.PymeRegisteredProducer;
 import ucr.ac.cr.BackendVentas.jpa.entities.PymeEntity;
 import org.springframework.stereotype.Component;
 import ucr.ac.cr.BackendVentas.handlers.commands.RegisterPymeHandler;
+import ucr.ac.cr.BackendVentas.producers.SendUserPymeIdProducer;
 
 @Component
 public class RegisterPymeHandlerImpl implements RegisterPymeHandler {
     private final PymeRepository pymeRepository;
     private final PymeRegisteredProducer pymeRegisteredProducer;
+    private final SendUserPymeIdProducer sendUserPymeIdProducer;
     private final CreatePymeConfirmationCodeHandler createPymeCodeHandler;
 
     @Autowired
     public RegisterPymeHandlerImpl(PymeRepository pymeRepository,
                                    PymeRegisteredProducer pymeRegisteredProducer,
+                                   SendUserPymeIdProducer sendUserPymeIdProducer,
                                    CreatePymeConfirmationCodeHandler createPymeCodeHandler) {
         this.pymeRepository = pymeRepository;
         this.pymeRegisteredProducer = pymeRegisteredProducer;
+        this.sendUserPymeIdProducer = sendUserPymeIdProducer;
         this.createPymeCodeHandler = createPymeCodeHandler;
     }
 
@@ -52,7 +57,13 @@ public class RegisterPymeHandlerImpl implements RegisterPymeHandler {
 
         String confirmationCode = createPymeCodeHandler.handle(savedPyme);
 
+
+        sendUserPymeIdProducer.sendUserPymeId(new SendUserPymeIdEvent(savedPyme.getId(), command.userId()));
+
+
         PymeRegisteredEvent event = new PymeRegisteredEvent(savedPyme.getEmail(), confirmationCode, savedPyme.getName());
+
+
 
         // Enviar el evento a Kafka
         boolean enviado = pymeRegisteredProducer.sendEmailConfirmation(event);

@@ -47,7 +47,5 @@ public class RegisterUserHandler {
         if (command.password() == null) {
             throw new InvalidInputException("password");
         }
-
-
     }
 }

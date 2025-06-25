@@ -154,7 +154,7 @@ public class ProductController {
         }
     }
 
-
+  
     @GetMapping("/search")
     public Response searchProducts(
             @RequestParam(required = false) String term,
@@ -183,7 +183,6 @@ public class ProductController {
     }
 
 
-
     @PutMapping("/promotion/{productId}")
     public Response applyPromotion(@PathVariable UUID productId, @RequestBody Map<String, String> request) {
         String promotion = request.get("promotion");
@@ -202,7 +201,6 @@ public class ProductController {
             throw new IllegalStateException("Unexpected result: " + result);
         }
     }
-
 
 
 
