@@ -4,8 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ucr.ac.cr.authentication.exceptions.BusinessException;
-import ucr.ac.cr.authentication.handlers.commands.LoginUserHandler;
+import ucr.ac.cr.authentication.handlers.LoginUserHandler;
 import ucr.ac.cr.authentication.models.BaseException;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/public/auth")
@@ -17,9 +19,9 @@ public class LoginController {
     @PostMapping("/loginUser")
     public ResponseEntity<?> login(@RequestBody LoginUserHandler.Command command) {
         try {
-            String token = loginUserHandler.login(command);
+            Map<String, Object> loginResponse = loginUserHandler.login(command);
 
-            return ResponseEntity.ok().body(token);
+            return ResponseEntity.ok().body(loginResponse);
         } catch (BusinessException ex) {
             return ResponseEntity.badRequest().body(BaseException.exceptionBuilder()
                     .code("INVALID_CREDENTIALS")
@@ -27,4 +29,5 @@ public class LoginController {
                     .build());
         }
     }
+
 }
