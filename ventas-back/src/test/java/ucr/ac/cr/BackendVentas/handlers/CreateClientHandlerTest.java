@@ -20,6 +20,7 @@ import ucr.ac.cr.BackendVentas.jpa.repositories.OrderRepository;
 import ucr.ac.cr.BackendVentas.jpa.repositories.ProductRepository;
 import ucr.ac.cr.BackendVentas.models.OrderProduct;
 import ucr.ac.cr.BackendVentas.producers.PurchaseSummaryProducer;
+import ucr.ac.cr.BackendVentas.service.SendPurchaseService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -57,6 +58,9 @@ public class CreateClientHandlerTest {
 
     @MockitoBean
     private PurchaseSummaryProducer purchaseSummaryProducer;
+
+    @MockitoBean
+    private SendPurchaseService sendPurchaseService;
 
     @Test
     void createClient_withNullId_shouldGenerateNewId() {
