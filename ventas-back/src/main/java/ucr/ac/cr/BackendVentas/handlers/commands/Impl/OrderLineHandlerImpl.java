@@ -70,11 +70,24 @@ public class OrderLineHandlerImpl implements OrderLineHandler {
     }
 
     private OrderLineEntity saveOrderLine(OrderLineEntity line) {
-        return orderLineQuery.save(line).orElseThrow(() -> validationError(
-                "No se pudo guardar la línea de orden",
-                ErrorCode.UNEXPECTED_ERROR,
-                "orderLine"
-        ));
+        ProductEntity product = line.getProduct();
+        int currentStock = product.getStock();
+        int quantityOrdered = line.getQuantity();
+
+        if (quantityOrdered > currentStock) {
+            throw validationError(
+                    "No hay suficiente stock para el producto: " + product.getName(),
+                    ErrorCode.OUT_OF_STOCK,
+                    "stock"
+            );
+        }
+
+        product.setStock(currentStock - quantityOrdered);
+        productRepository.save(product);  // Se actualiza el stock del producto
+
+        return orderLineQuery.save(line).orElseThrow(() ->
+                validationError("No se pudo guardar la línea de orden", ErrorCode.UNEXPECTED_ERROR, "orderLine")
+        );
     }
 
 }
