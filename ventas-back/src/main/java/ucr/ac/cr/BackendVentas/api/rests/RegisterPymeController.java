@@ -37,7 +37,7 @@ public class RegisterPymeController {
 
         return switch (result) {
             case RegisterPymeHandler.Result.Success success ->
-                    ResponseEntity.ok(success);
+                    ResponseEntity.ok(new PymeResponse(success.pymeId(), command.email()));
 
             case RegisterPymeHandler.Result.InvalidFields invalid ->
                     ResponseEntity.badRequest().body(invalid);
@@ -61,5 +61,4 @@ public class RegisterPymeController {
             }
         };
     }
-
 }
