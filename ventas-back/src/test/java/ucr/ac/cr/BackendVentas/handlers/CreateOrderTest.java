@@ -18,6 +18,7 @@ import ucr.ac.cr.BackendVentas.jpa.repositories.ProductRepository;
 import ucr.ac.cr.BackendVentas.models.BaseException;
 import ucr.ac.cr.BackendVentas.models.OrderProduct;
 import ucr.ac.cr.BackendVentas.producers.PurchaseSummaryProducer;
+import ucr.ac.cr.BackendVentas.service.SendPurchaseService;
 import ucr.ac.cr.BackendVentas.utils.MonetaryUtils;
 
 import java.math.BigDecimal;
@@ -50,6 +51,9 @@ public class CreateOrderTest {
 
     @MockitoBean
     private PurchaseSummaryProducer purchaseSummaryProducer;
+
+    @MockitoBean
+    private SendPurchaseService sendPurchaseService;
 
     /**
      * Test Case: CP-ORDER-001
