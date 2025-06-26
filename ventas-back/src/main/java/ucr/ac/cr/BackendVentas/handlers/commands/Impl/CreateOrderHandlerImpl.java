@@ -94,8 +94,8 @@ public class CreateOrderHandlerImpl implements CreateOrderHandler {
         }).toList();
 
         ProductSendDTO kafkaMessage = new ProductSendDTO(
-                command.userId(),
-                command.firstName() + " " + command.lastName(),
+                finalCommand.userId(),
+                finalCommand.firstName() + " " + finalCommand.lastName(),
                 productList
         );
 
