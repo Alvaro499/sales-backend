@@ -8,7 +8,7 @@ def get_association_recommendations(user_id: int):
     try:
         db: Session = SessionLocal()
 
-        # ❗ Query corregido: f-string con user_id embebido
+        # Query corregido: f-string con user_id embebido
         query = f"""
             SELECT o.user_id, ol.order_id, ol.product_id
             FROM orders o
