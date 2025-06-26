@@ -202,6 +202,18 @@ public class ProductController {
         }
     }
 
+    @GetMapping("/count/active")
+    public Response countActiveProducts() {
+        long count = productRepository.countByIsActiveTrue();
+        return new Response("Active products count", count);
+    }
+
+    @GetMapping("/count")
+    public Response countProducts() {
+        long count = productRepository.count();
+        return new Response("Total products count", count);
+    }
+
 
 
 }
