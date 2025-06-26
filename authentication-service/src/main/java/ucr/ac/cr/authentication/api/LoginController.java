@@ -8,7 +8,7 @@ import ucr.ac.cr.authentication.handlers.LoginUserHandler;
 import ucr.ac.cr.authentication.models.BaseException;
 
 import java.util.Map;
-
+@CrossOrigin(origins = "http://localhost:5173") // o el dominio de tu frontend
 @RestController
 @RequestMapping("/api/public/auth")
 public class LoginController {
