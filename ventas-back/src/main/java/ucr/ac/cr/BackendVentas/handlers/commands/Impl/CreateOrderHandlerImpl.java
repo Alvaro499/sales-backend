@@ -3,6 +3,7 @@ package ucr.ac.cr.BackendVentas.handlers.commands.Impl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ucr.ac.cr.BackendVentas.api.types.enums.OrderStatus;
+import ucr.ac.cr.BackendVentas.events.ProductSendDTO;
 import ucr.ac.cr.BackendVentas.events.PurchaseSummaryMessage;
 import ucr.ac.cr.BackendVentas.handlers.commands.CreateOrderHandler;
 import ucr.ac.cr.BackendVentas.handlers.commands.OrderLineHandler;
@@ -16,6 +17,7 @@ import ucr.ac.cr.BackendVentas.models.OrderProduct;
 import ucr.ac.cr.BackendVentas.handlers.validators.OrderValidator;
 import ucr.ac.cr.BackendVentas.producers.PurchaseSummaryProducer;
 import ucr.ac.cr.BackendVentas.service.PurchaseSummaryAssembler;
+import ucr.ac.cr.BackendVentas.service.SendPurchaseService;
 import ucr.ac.cr.BackendVentas.utils.MonetaryUtils;
 import ucr.ac.cr.BackendVentas.utils.ValidationUtils;
 
@@ -35,6 +37,8 @@ public class CreateOrderHandlerImpl implements CreateOrderHandler {
     private final PaymentMethodQuery paymentMethodQuery;
     private final ShippingMethodQuery shippingMethodQuery;
     private final PurchaseSummaryProducer purchaseSummaryProducer;
+    private final SendPurchaseService sendPurchaseService;
+
 
     public CreateOrderHandlerImpl(OrderQuery orderQuery,
                                   ProductQuery productQuery,
@@ -42,7 +46,8 @@ public class CreateOrderHandlerImpl implements CreateOrderHandler {
                                   OrderValidator orderValidator,
                                   PaymentMethodQuery paymentMethodQuery,
                                   ShippingMethodQuery shippingMethodQuery,
-                                  PurchaseSummaryProducer purchaseSummaryProducer) {
+                                  PurchaseSummaryProducer purchaseSummaryProducer,
+                                  SendPurchaseService sendPurchaseService) {
 
         this.orderQuery = orderQuery;
         this.productQuery = productQuery;
@@ -51,6 +56,7 @@ public class CreateOrderHandlerImpl implements CreateOrderHandler {
         this.paymentMethodQuery = paymentMethodQuery;
         this.shippingMethodQuery = shippingMethodQuery;
         this.purchaseSummaryProducer = purchaseSummaryProducer;
+        this.sendPurchaseService = sendPurchaseService;
     }
 
     @Transactional
@@ -73,6 +79,18 @@ public class CreateOrderHandlerImpl implements CreateOrderHandler {
         );
 
         purchaseSummaryProducer.sendEmailSummary(message);
+        List<ProductSendDTO.ProductInfo> productList = command.products().stream().map(p -> {
+            ProductEntity prod = productQuery.findById(p.productId()).orElseThrow();
+            return new ProductSendDTO.ProductInfo(prod.getId(), prod.getName());
+        }).toList();
+
+        ProductSendDTO kafkaMessage = new ProductSendDTO(
+                command.userId(),
+                command.firstName() + " " + command.lastName(),
+                productList
+        );
+
+        sendPurchaseService.sendOrder(kafkaMessage);
         //Se retornan los IDs de las órdenes creadas
         return new Result.Success(orders.stream().map(OrderEntity::getId).toList());
     }
