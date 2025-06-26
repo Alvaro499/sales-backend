@@ -11,12 +11,18 @@ spring:
       auto-offset-reset: earliest
 
   jpa:
-    show-sql: true
     hibernate:
       ddl-auto: update
+    show-sql: true
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  datasource:
+    url: jdbc:postgresql://postgres:5432/authdb
+    username: authuser
+    password: authpass
+    driver-class-name: org.postgresql.Driver
 
 eureka:
   client:
