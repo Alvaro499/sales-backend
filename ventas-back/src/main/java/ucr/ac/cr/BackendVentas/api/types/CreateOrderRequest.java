@@ -8,6 +8,7 @@ import java.util.UUID;
 
 public record CreateOrderRequest(
     UUID guestUserId,
+    String buyerType, // "USER" o "CLIENT"
     String email,           
     String firstName,
     String lastName,
