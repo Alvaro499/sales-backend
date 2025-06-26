@@ -7,12 +7,17 @@ import ucr.ac.cr.BackendVentas.api.types.ActivatePymeCodeRequest;
 import ucr.ac.cr.BackendVentas.handlers.commands.ActivatePymeCodeHandler;
 import ucr.ac.cr.BackendVentas.models.BaseException;
 import ucr.ac.cr.BackendVentas.models.ErrorCode;
+import ucr.ac.cr.BackendVentas.repositories.PymeRepository;
+
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/pymes")
 public class ActivatePymeCodeController {
+
+    @Autowired
+    private PymeRepository pymeRepository;
 
     @Autowired
     private ActivatePymeCodeHandler activatePymeCodeHandler;
