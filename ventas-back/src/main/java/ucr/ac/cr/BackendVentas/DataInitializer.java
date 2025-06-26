@@ -32,6 +32,7 @@ public class DataInitializer {
     @PostConstruct
     public void init() {
         System.out.println("[PRODUCCIÓN] DataInitializer ejecutado.");
+        /*
         if (categoryRepo.count() > 0 && pymeRepo.count() > 0 && productRepo.count() > 0 && paymentRepo.count() > 0 && shippingRepo.count() > 0 && clientRepo.count() > 0) {
             return;
         }
@@ -96,6 +97,8 @@ public class DataInitializer {
         ProductEntity prod9 = createProduct("Portarretrato de Madera", "Hecho a mano", new BigDecimal("6000"), 10, decor, pyme3, BigDecimal.ZERO);
 
         productRepo.saveAll(List.of(prod1, prod2, prod3, prod4, prod5, prod6, prod7, prod8, prod9));
+
+         */
     }
 
     // Métodos auxiliares
