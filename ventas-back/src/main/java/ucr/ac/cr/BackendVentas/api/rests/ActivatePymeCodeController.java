@@ -22,9 +22,6 @@ public class ActivatePymeCodeController {
     @Autowired
     private ActivatePymeCodeHandler activatePymeCodeHandler;
 
-    @Autowired
-    private PymeRepository pymeRepository;
-
     @PostMapping("/activate")
     public ResponseEntity<?> activateCode(@RequestBody ActivatePymeCodeRequest request) {
         var command = new ActivatePymeCodeHandler.Command(

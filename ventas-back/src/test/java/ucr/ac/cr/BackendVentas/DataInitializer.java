@@ -8,6 +8,7 @@ import ucr.ac.cr.BackendVentas.jpa.entities.*;
 import ucr.ac.cr.BackendVentas.jpa.repositories.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,6 +20,8 @@ public class DataInitializer {
     @Autowired private CategoryRepository categoryRepo;
     @Autowired private PaymentMethodRepository paymentRepo;
     @Autowired private ShippingMethodRepository shippingRepo;
+    @Autowired private ClientRepository clientRepo;
+
 
     @PostConstruct
     public void init() {
@@ -50,6 +53,11 @@ public class DataInitializer {
                 createShipping("CORREOS_CR", "Entrega en 3 a 5 días hábiles", new BigDecimal("1500"), true),
                 createShipping("ENVIOS_EXPRESS", "Entrega rápida en 1 día", new BigDecimal("3000"), true)
         ));
+
+        // Crear cliente de prueba
+        ClientEntity testClient = new ClientEntity();
+        testClient.setExpiresAt(LocalDateTime.now().plusDays(60));
+        clientRepo.save(testClient);
 
         createDataForBasic(tech, food, decor);
         createDataForRollback(tech, food, decor);
