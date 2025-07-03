@@ -2,26 +2,24 @@ from sqlalchemy.orm import Session
 from app.database import SessionLocal
 import pandas as pd
 from mlxtend.frequent_patterns import apriori, association_rules
+from uuid import UUID
 
-
-def get_association_recommendations(user_id: int):
+def get_association_recommendations(user_id: UUID):
     try:
         db: Session = SessionLocal()
 
-        # Query corregido: f-string con user_id embebido
-        query = f"""
+        query = """
             SELECT o.user_id, ol.order_id, ol.product_id
             FROM orders o
             JOIN order_lines ol ON o.order_id = ol.order_id
-            WHERE o.user_id = {user_id}
+            WHERE o.user_id = :user_id
         """
-        df = pd.read_sql(query, db.bind)
+        df = pd.read_sql(query, db.bind, params={"user_id": str(user_id)})
         db.close()
 
         if df.empty:
             return {"recommendations": []}
 
-        # Crear cesta de productos
         basket = df.groupby(['order_id', 'product_id'])['product_id'] \
             .count().unstack().fillna(0)
         basket = basket.applymap(lambda x: 1 if x > 0 else 0)
