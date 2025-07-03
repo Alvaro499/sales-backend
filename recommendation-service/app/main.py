@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from app.association import get_association_recommendations
 from app.content_based import get_content_based_recommendations
 from app.schemas import RecommendationResponse
@@ -9,6 +10,14 @@ import threading
 from app.consumer import run_consumer
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["*"],
+)
 
 @app.on_event("startup")
 def start_consumer():

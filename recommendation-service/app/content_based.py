@@ -4,6 +4,7 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from uuid import UUID
+import logging
 
 def get_content_based_recommendations(product_id: UUID):
     try:
@@ -15,10 +16,12 @@ def get_content_based_recommendations(product_id: UUID):
         if df.empty or str(product_id) not in df['product_id'].astype(str).values:
             return {"recommendations": []}
 
+        # Preprocesamiento
         df['description'] = df['description'].fillna('')
         tfidf = TfidfVectorizer(stop_words='english')
         tfidf_matrix = tfidf.fit_transform(df['description'])
 
+        # Índices
         df['product_id_str'] = df['product_id'].astype(str)
         indices = pd.Series(df.index, index=df['product_id_str'])
 
@@ -39,4 +42,5 @@ def get_content_based_recommendations(product_id: UUID):
         return {"recommendations": recommendations}
 
     except Exception as e:
-        return {"error": str(e)}
+        logging.error(f"Error en content-based: {e}")
+        return {"recommendations": []}

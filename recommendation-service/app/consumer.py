@@ -15,7 +15,6 @@ def run_consumer():
         value_deserializer=lambda m: json.loads(m.decode('utf-8'))
     )
 
-    print("Esperando mensajes de órdenes...")
 
     for message in consumer:
         order_data = message.value
@@ -23,9 +22,6 @@ def run_consumer():
         user_name = order_data['userName']
         products = order_data['products']
 
-        print(f"Orden recibida del usuario {user_name} (ID: {user_id}):")
-        for prod in products:
-            print(f"Producto: {prod['name']} (ID: {prod['productId']})")
 
         session = SessionLocal()
         try:
@@ -54,12 +50,9 @@ def run_consumer():
                 session.add(order_line)
 
             session.commit()
-            print("Orden guardada correctamente.\n")
         except IntegrityError as e:
             session.rollback()
-            print("Error de integridad al guardar la orden:", e)
         except Exception as e:
             session.rollback()
-            print("Error al guardar en la base de datos:", e)
         finally:
             session.close()
