@@ -88,7 +88,7 @@ public class CreateOrderHandlerImpl implements CreateOrderHandler {
         purchaseSummaryProducer.sendEmailSummary(message);
 
         // Enviar productos comprados por Kafka
-        List<ProductSendDTO.ProductInfo> productList = command.products().stream().map(p -> {
+        List<ProductSendDTO.ProductInfo> productList = finalCommand.products().stream().map(p -> {
             ProductEntity prod = productQuery.findById(p.productId()).orElseThrow();
             return new ProductSendDTO.ProductInfo(prod.getId(), prod.getName());
         }).toList();

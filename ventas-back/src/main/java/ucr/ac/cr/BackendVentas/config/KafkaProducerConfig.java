@@ -35,13 +35,14 @@ public class KafkaProducerConfig {
         return new ObjectMapper();
     }
 
-    //KafkaTemplate para ProductSendDTO,  usado para enviar objetos complejos el recommendations-service
+    //KafkaTemplate para ProductSendDTO, usado para enviar objetos complejos el recommendations-service
     @Bean
     public ProducerFactory<String, ProductSendDTO> productSendDTOProducerFactory() {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        configProps.put("spring.json.add.type.headers", false);
         return new DefaultKafkaProducerFactory<>(configProps);
     }
 
