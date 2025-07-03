@@ -17,13 +17,6 @@ public class SendPurchaseService {
     }
 
     public void sendOrder(ProductSendDTO message) {
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            String json = mapper.writeValueAsString(message);
-            System.out.println("🔍 Enviando JSON: " + json);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         kafkaTemplate.send(TOPIC, message);
     }
 }
