@@ -5,6 +5,7 @@ import ucr.ac.cr.authentication.exceptions.InvalidInputException;
 import ucr.ac.cr.authentication.jpa.entities.UserEntity;
 import ucr.ac.cr.authentication.jpa.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,8 @@ public class RegisterUserHandler {
     private UserRepository repository;
     @Autowired
     private PasswordEncoder encoder;
+    @Autowired
+    private KafkaTemplate<String, String> kafkaTemplate;
 
     public record Command(String email, String name, String password) {
     }
@@ -29,6 +32,9 @@ public class RegisterUserHandler {
         user.setPassword(encoder.encode(command.password()));
         user.setRoles(List.of("ACCOUNT_MANAGER"));
         repository.save(user);
+        
+        // Send email notification via Kafka
+        kafkaTemplate.send("user-registered2", command.email());
     }
 
     private void validateExistingUser(String email) {
