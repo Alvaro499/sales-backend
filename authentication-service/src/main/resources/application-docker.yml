@@ -19,7 +19,7 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
   datasource:
-    url: jdbc:postgresql://postgres:5432/authdb
+    url: jdbc:postgresql://auth-db:5432/authdb
     username: authuser
     password: authpass
     driver-class-name: org.postgresql.Driver

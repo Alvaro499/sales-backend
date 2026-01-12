@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   eureka:
-    image: itschaco26/eureka:latest
+    build: ./eureka
     ports:
       - "8761:8761"
     environment:
@@ -11,7 +11,7 @@ services:
       - backend
 
   gateway:
-    image: itschaco26/gateway:latest
+    build: ./gateway
     ports:
       - "8000:8080"
     environment:
@@ -22,7 +22,7 @@ services:
       - backend
 
   authentication-service:
-    image: itschaco26/authentication-service:latest
+    build: ./authentication-service
     ports:
       - "8001:8083"
     environment:
@@ -34,7 +34,7 @@ services:
       - backend
 
   email-service:
-    image: itschaco26/email-service:latest
+    build: ./email-service
     ports:
       - "8002:8084"
     environment:
@@ -46,7 +46,7 @@ services:
       - backend
 
   ventas-back:
-    image: itschaco26/ventas-back:latest
+    build: ./ventas-back
     ports:
       - "8004:8082"
     environment:
@@ -59,7 +59,7 @@ services:
       - backend
 
   recommendation-service:
-    image: itschaco26/recommendation-service:latest
+    build: ./recommendation-service
     ports:
       - "8003:8000"
     environment:
@@ -108,6 +108,8 @@ services:
       POSTGRES_DB: authdb
     ports:
       - "5433:5432"
+    volumes:
+      - auth-db-data:/var/lib/postgresql/data
     networks:
       - backend
 
@@ -119,6 +121,8 @@ services:
       POSTGRES_DB: ventasdb
     ports:
       - "5435:5432"
+    volumes:
+      - ventas-db-data:/var/lib/postgresql/data
     networks:
       - backend
 
@@ -130,9 +134,16 @@ services:
       POSTGRES_DB: recodb
     ports:
       - "5434:5432"
+    volumes:
+      - recommendation-db-data:/var/lib/postgresql/data
     networks:
       - backend
 
 networks:
   backend:
     driver: bridge
+
+volumes:
+  auth-db-data:
+  ventas-db-data:
+  recommendation-db-data:
